@@ -1,0 +1,59 @@
+services:
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - sih-network
+
+  # Backend service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - CHROMA_HOST=chroma-db
+      - CHROMA_PORT=8000
+      - ENVIRONMENT=production
+    env_file:
+      - .env
+    depends_on:
+      - chroma-db
+    restart: unless-stopped
+    networks:
+      - sih-network
+
+  # ChromaDB service
+  chroma-db:
+    image: ghcr.io/chroma-core/chroma:0.4.22
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma-data:/chroma/.chroma/index
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_HTTP_PORT=8000
+    restart: unless-stopped
+    networks:
+      - sih-network
+
+# Named volumes for data persistence
+volumes:
+  chroma-data:
+    driver: local
+
+# Custom network for service communication
+networks:
+  sih-network:
+    driver: bridge
