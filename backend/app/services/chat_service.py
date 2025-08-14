@@ -18,7 +18,7 @@ class ChatService:
             raise ValueError("GEMINI_API_KEY environment variable is required")
         
         genai.configure(api_key=settings.gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
         
         # System prompt template for problem statement context
         self.system_prompt = """You are an AI assistant helping engineering students understand Smart India Hackathon problem statements. 

@@ -1,0 +1,129 @@
+name: Deploy to Azure AKS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+      gemini_api_key:
+        description: 'Gemini API Key'
+        required: true
+        type: string
+
+env:
+  AZURE_RESOURCE_GROUP: sih-solvers-compass-rg
+  AZURE_AKS_CLUSTER: sih-solvers-compass-aks
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.5.0
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+
+    - name: Terraform Init
+      working-directory: infrastructure/terraform
+      run: terraform init
+
+    - name: Terraform Plan
+      working-directory: infrastructure/terraform
+      run: |
+        terraform plan \
+          -var="gemini_api_key=${{ github.event.inputs.gemini_api_key }}" \
+          -var="environment=${{ github.event.inputs.environment }}"
+
+    - name: Terraform Apply
+      working-directory: infrastructure/terraform
+      run: |
+        terraform apply -auto-approve \
+          -var="gemini_api_key=${{ github.event.inputs.gemini_api_key }}" \
+          -var="environment=${{ github.event.inputs.environment }}"
+
+    - name: Get AKS credentials
+      run: |
+        az aks get-credentials \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --name ${{ env.AZURE_AKS_CLUSTER }} \
+          --overwrite-existing
+
+    - name: Deploy to Kubernetes
+      run: |
+        # Create namespace
+        kubectl apply -f infrastructure/k8s/namespace.yaml
+        
+        # Create secrets
+        kubectl create secret generic sih-secrets \
+          --from-literal=gemini-api-key="${{ github.event.inputs.gemini_api_key }}" \
+          --namespace=sih-solvers-compass \
+          --dry-run=client -o yaml | kubectl apply -f -
+        
+        # Get storage account details from Terraform
+        cd infrastructure/terraform
+        STORAGE_ACCOUNT_NAME=$(terraform output -raw storage_account_name)
+        STORAGE_ACCOUNT_KEY=$(terraform output -raw storage_account_key)
+        cd ../..
+        
+        kubectl create secret generic azure-storage-secret \
+          --from-literal=azurestorageaccountname="$STORAGE_ACCOUNT_NAME" \
+          --from-literal=azurestorageaccountkey="$STORAGE_ACCOUNT_KEY" \
+          --namespace=sih-solvers-compass \
+          --dry-run=client -o yaml | kubectl apply -f -
+        
+        # Deploy applications
+        kubectl apply -f infrastructure/k8s/chromadb.yaml
+        kubectl apply -f infrastructure/k8s/backend.yaml
+        kubectl apply -f infrastructure/k8s/frontend.yaml
+        
+        # Wait for deployments
+        kubectl wait --for=condition=available --timeout=300s deployment/chromadb -n sih-solvers-compass
+        kubectl wait --for=condition=available --timeout=300s deployment/backend -n sih-solvers-compass
+        kubectl wait --for=condition=available --timeout=300s deployment/frontend -n sih-solvers-compass
+
+    - name: Get Application URL
+      run: |
+        echo "Waiting for LoadBalancer IP..."
+        EXTERNAL_IP=""
+        for i in {1..30}; do
+          EXTERNAL_IP=$(kubectl get svc frontend-service -n sih-solvers-compass --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}")
+          if [ ! -z "$EXTERNAL_IP" ]; then
+            break
+          fi
+          sleep 10
+        done
+        
+        if [ ! -z "$EXTERNAL_IP" ]; then
+          echo "🎉 Application deployed successfully!"
+          echo "🌐 Application URL: http://$EXTERNAL_IP"
+          echo "📚 API Documentation: http://$EXTERNAL_IP/api/docs"
+        else
+          echo "⚠️ LoadBalancer IP not assigned yet. Check Azure portal."
+        fi
+
+    - name: Run Data Ingestion
+      run: |
+        echo "Running data ingestion..."
+        BACKEND_POD=$(kubectl get pods -n sih-solvers-compass -l app=backend -o jsonpath="{.items[0].metadata.name}")
+        kubectl exec -n sih-solvers-compass $BACKEND_POD -- python scripts/ingest_data.py
