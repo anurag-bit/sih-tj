@@ -1,7 +1,7 @@
 services:
   # Frontend service - using pre-built image
   frontend:
-    image: ghcr.io/your-username/sih-solvers-compass-frontend:latest
+    image: ghcr.io/anurag-bit/sih-tj-frontend:latest
     ports:
       - "80:80"
     environment:
@@ -14,7 +14,7 @@ services:
 
   # Backend service - using pre-built image
   backend:
-    image: ghcr.io/anurag-bit/sih-solvers-compass-backend:latest
+    image: ghcr.io/anurag-bit/sih-tj-backend:latest
     ports:
       - "8000:8000"
     environment:
