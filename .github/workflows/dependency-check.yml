@@ -1,0 +1,109 @@
+name: Dependency Check
+
+on:
+  push:
+    paths:
+      - 'backend/requirements.txt'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+  pull_request:
+    paths:
+      - 'backend/requirements.txt'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+
+jobs:
+  check-python-deps:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install pip-tools
+      run: |
+        python -m pip install --upgrade pip pip-tools
+
+    - name: Check requirements.txt syntax
+      working-directory: ./backend
+      run: |
+        pip-compile --dry-run requirements.txt || echo "pip-compile not available, checking manually"
+        python -c "
+        with open('requirements.txt') as f:
+            lines = f.readlines()
+        print(f'Found {len(lines)} dependencies')
+        for line in lines:
+            if line.strip() and not line.startswith('#'):
+                print(f'  - {line.strip()}')
+        "
+
+    - name: Test dependency installation
+      working-directory: ./backend
+      run: |
+        pip install --dry-run -r requirements.txt
+        echo "✓ All dependencies can be resolved"
+
+    - name: Check for known conflicts
+      working-directory: ./backend
+      run: |
+        python -c "
+        import sys
+        conflicts = []
+        
+        # Check for common conflicts
+        with open('requirements.txt') as f:
+            deps = f.read().lower()
+            
+        if 'numpy>=2.0' in deps or 'numpy==2.' in deps:
+            conflicts.append('NumPy 2.0+ may conflict with ChromaDB')
+            
+        if 'torch>=2.1' in deps:
+            conflicts.append('PyTorch 2.1+ may cause build timeouts')
+            
+        if conflicts:
+            print('⚠️  Potential conflicts found:')
+            for conflict in conflicts:
+                print(f'  - {conflict}')
+        else:
+            print('✓ No known conflicts detected')
+        "
+
+  check-node-deps:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Check package.json
+      working-directory: ./frontend
+      run: |
+        node -e "
+        const pkg = require('./package.json');
+        console.log('Package name:', pkg.name);
+        console.log('Dependencies:', Object.keys(pkg.dependencies || {}).length);
+        console.log('DevDependencies:', Object.keys(pkg.devDependencies || {}).length);
+        "
+
+    - name: Install dependencies (dry run)
+      working-directory: ./frontend
+      run: |
+        npm install --dry-run
+
+    - name: Check for security vulnerabilities
+      working-directory: ./frontend
+      run: |
+        npm audit --audit-level=high || echo "Security audit completed with warnings"

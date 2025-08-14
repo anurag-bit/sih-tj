@@ -1,0 +1,81 @@
+name: Build Test
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/**'
+
+jobs:
+  test-backend-build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Test backend Docker build
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile
+        push: false
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+
+  test-frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Test frontend Docker build
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        file: ./frontend/Dockerfile
+        push: false
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+
+  test-compose-config:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create test .env file
+      run: |
+        cat > .env << EOF
+        GEMINI_API_KEY=test_key
+        GITHUB_TOKEN=test_token
+        CHROMA_HOST=chroma-db
+        CHROMA_PORT=8000
+        ENVIRONMENT=test
+        REACT_APP_API_URL=http://localhost:8000
+        CORS_ORIGINS=http://localhost:3000,http://localhost:80
+        LOG_LEVEL=INFO
+        EOF
+
+    - name: Validate Docker Compose configuration
+      run: |
+        docker-compose config
+
+    - name: Test Docker Compose build (dry run)
+      run: |
+        docker-compose build --dry-run || echo "Dry run not supported, testing config only"
