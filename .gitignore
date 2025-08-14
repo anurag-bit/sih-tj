@@ -27,3 +27,16 @@ override.tf.json
 # Terraform variable files (if they contain sensitive data)
 terraform.tfvars
 terraform.tfvars.json
+*backend/app/__pycache__/*
+backend/app/__pycache__/*
+backend/app/routers/__pycache__/__init__.cpython-310.pyc
+backend/app/routers/__pycache__/chat.cpython-310.pyc
+backend/app/routers/__pycache__/dashboard.cpython-310.pyc
+backend/app/routers/__pycache__/github.cpython-310.pyc
+backend/app/routers/__pycache__/search.cpython-310.pyc
+backend/app/services/__pycache__/__init__.cpython-310.pyc
+backend/app/services/__pycache__/chat_service.cpython-310.pyc
+backend/app/services/__pycache__/dashboard_service.cpython-310.pyc
+backend/app/services/__pycache__/github_service.cpython-310.pyc
+backend/app/services/__pycache__/search_service.cpython-310.pyc
+__pycache__
