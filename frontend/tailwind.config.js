@@ -30,6 +30,15 @@ export default {
       },
       transitionDuration: {
         '150': '150ms',
+      },
+      screens: {
+        'xs': '475px',
+      },
+      minHeight: {
+        'screen-safe': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+      },
+      maxWidth: {
+        'screen-sm': '100vw',
       }
     },
   },

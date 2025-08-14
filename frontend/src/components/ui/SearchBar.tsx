@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Button from './Button';
+import LoadingSpinner from './LoadingSpinner';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -33,8 +34,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <form onSubmit={handleSubmit} className={`relative ${className}`}>
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+        <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+          <MagnifyingGlassIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
         </div>
         <input
           type="text"
@@ -43,15 +44,17 @@ const SearchBar: React.FC<SearchBarProps> = ({
           onKeyPress={handleKeyPress}
           placeholder={placeholder}
           disabled={loading}
-          className="w-full pl-12 pr-24 py-4 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full pl-10 sm:pl-12 pr-20 sm:pr-24 py-3 sm:py-4 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
         />
-        <div className="absolute right-2 top-2">
+        <div className="absolute right-1 sm:right-2 top-1 sm:top-2">
           <Button 
             type="submit" 
             disabled={!query.trim() || loading}
-            className="px-6"
+            className="px-3 sm:px-6 py-2 sm:py-2 flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
           >
-            {loading ? 'Searching...' : 'Search'}
+            {loading && <LoadingSpinner size="sm" color="white" />}
+            <span className="hidden sm:inline">{loading ? 'Searching...' : 'Search'}</span>
+            <span className="sm:hidden">{loading ? '...' : 'Go'}</span>
           </Button>
         </div>
       </div>

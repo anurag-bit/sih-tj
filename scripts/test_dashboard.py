@@ -1,171 +1,164 @@
 #!/usr/bin/env python3
 """
-Test script for dashboard analytics functionality.
-Tests the dashboard service with embedded ChromaDB client.
+Test script for dashboard functionality.
+Tests the dashboard API endpoints and validates the response structure.
 """
 
-import os
-import sys
+import requests
 import json
-import asyncio
-from pathlib import Path
+import sys
+from typing import Dict, Any
 
-# Add backend to Python path
-backend_path = Path(__file__).parent.parent / "backend"
-sys.path.append(str(backend_path))
+API_BASE_URL = "http://localhost:8000/api"
 
-from app.services.dashboard_service import DashboardService
-from app.models import DashboardStats
-
-
-async def test_dashboard_service():
-    """Test the dashboard service functionality."""
-    print("="*60)
-    print("TESTING DASHBOARD ANALYTICS SERVICE")
-    print("="*60)
-    
-    # Create dashboard service instance
-    dashboard_service = DashboardService()
-    
-    # Override ChromaDB connection to use embedded client (for testing)
-    import chromadb
-    dashboard_service.chroma_client = chromadb.Client()
-    
+def test_dashboard_health():
+    """Test dashboard health endpoint."""
+    print("Testing dashboard health...")
     try:
-        # Get or create collection
-        dashboard_service.collection = dashboard_service.chroma_client.get_or_create_collection(
-            name="problem_statements",
-            metadata={"hnsw:space": "cosine"}
-        )
-        dashboard_service._initialized = True
+        response = requests.get(f"{API_BASE_URL}/dashboard/health", timeout=10)
+        response.raise_for_status()
         
-        print("✓ Connected to ChromaDB (embedded client)")
+        health_data = response.json()
+        print(f"✓ Dashboard health: {health_data.get('status', 'unknown')}")
+        print(f"  - Initialized: {health_data.get('initialized', False)}")
+        print(f"  - Total problems: {health_data.get('total_problems', 0)}")
+        print(f"  - Categories: {health_data.get('categories_count', 0)}")
+        print(f"  - Organizations: {health_data.get('organizations_count', 0)}")
+        print(f"  - Keywords: {health_data.get('keywords_count', 0)}")
         
-        # Check if we have data
-        count = dashboard_service.collection.count()
-        print(f"✓ Found {count} problem statements in database")
-        
-        if count == 0:
-            print("⚠ No data found. Please run the ingestion script first:")
-            print("  python scripts/ingest_data.py")
-            return
-        
-        # Test health check
-        print("\n--- Testing Health Check ---")
-        health = await dashboard_service.health_check()
-        print(f"Health Status: {health['status']}")
-        print(f"Total Problems: {health.get('total_problems', 'N/A')}")
-        print(f"Categories Count: {health.get('categories_count', 'N/A')}")
-        print(f"Organizations Count: {health.get('organizations_count', 'N/A')}")
-        print(f"Keywords Count: {health.get('keywords_count', 'N/A')}")
-        
-        # Test dashboard stats
-        print("\n--- Testing Dashboard Stats ---")
-        stats = await dashboard_service.get_dashboard_stats()
-        
-        print(f"Total Problems: {stats.total_problems}")
-        print(f"Categories: {len(stats.categories)}")
-        print(f"Top Keywords: {len(stats.top_keywords)}")
-        print(f"Top Organizations: {len(stats.top_organizations)}")
-        
-        # Display categories
-        print("\n--- Categories Breakdown ---")
-        for category, count in stats.categories.items():
-            print(f"  {category}: {count}")
-        
-        # Display top keywords
-        print("\n--- Top Keywords ---")
-        for keyword, count in stats.top_keywords[:10]:  # Show top 10
-            print(f"  {keyword}: {count}")
-        
-        # Display top organizations
-        print("\n--- Top Organizations ---")
-        for org, count in stats.top_organizations.items():
-            print(f"  {org}: {count}")
-        
-        # Test category breakdown
-        print("\n--- Testing Category Breakdown ---")
-        breakdown = await dashboard_service.get_category_breakdown()
-        print(f"Total Problems: {breakdown['total']}")
-        for category, data in breakdown['categories'].items():
-            print(f"  {category}: {data['count']} ({data['percentage']}%)")
-        
-        # Test technology trends
-        print("\n--- Testing Technology Trends ---")
-        trends = await dashboard_service.get_technology_trends()
-        print(f"Total Keywords: {trends['total_keywords']}")
-        
-        print("Technology Keywords:")
-        for keyword, count in trends['technology_keywords'][:5]:  # Show top 5
-            print(f"  {keyword}: {count}")
-        
-        print("Domain Keywords:")
-        for keyword, count in trends['domain_keywords'][:5]:  # Show top 5
-            print(f"  {keyword}: {count}")
-        
-        # Test caching
-        print("\n--- Testing Cache ---")
-        print(f"Cache Valid: {dashboard_service._is_cache_valid()}")
-        
-        # Test cache refresh
-        stats2 = await dashboard_service.get_dashboard_stats(force_refresh=True)
-        print(f"Force Refresh - Total Problems: {stats2.total_problems}")
-        
-        # Clear cache
-        await dashboard_service.clear_cache()
-        print("✓ Cache cleared")
-        
-        print("\n" + "="*60)
-        print("✓ ALL DASHBOARD TESTS COMPLETED SUCCESSFULLY")
-        print("="*60)
+        return health_data.get('status') == 'healthy'
         
     except Exception as e:
-        print(f"❌ Error testing dashboard service: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        print(f"✗ Dashboard health check failed: {e}")
+        return False
 
-
-def test_dashboard_models():
-    """Test dashboard data models."""
-    print("\n--- Testing Dashboard Models ---")
-    
-    # Test DashboardStats model
-    stats = DashboardStats(
-        categories={"Software": 10, "IoT": 5},
-        top_keywords=[("python", 8), ("react", 6)],
-        top_organizations={"Ministry A": 7, "Ministry B": 8},
-        total_problems=15
-    )
-    
-    print(f"✓ DashboardStats model created: {stats.total_problems} problems")
-    
-    # Test JSON serialization
-    stats_json = stats.model_dump()
-    print(f"✓ JSON serialization works: {len(stats_json)} fields")
-    
-    # Test validation
+def test_dashboard_stats():
+    """Test dashboard stats endpoint."""
+    print("\nTesting dashboard stats...")
     try:
-        invalid_stats = DashboardStats(
-            categories={},
-            top_keywords=[],
-            top_organizations={},
-            total_problems=-1  # Invalid negative value
-        )
-        print("⚠ Model validation might need improvement")
+        response = requests.get(f"{API_BASE_URL}/dashboard/stats", timeout=10)
+        response.raise_for_status()
+        
+        stats_data = response.json()
+        
+        # Validate response structure
+        required_fields = ['categories', 'top_keywords', 'top_organizations', 'total_problems']
+        for field in required_fields:
+            if field not in stats_data:
+                print(f"✗ Missing required field: {field}")
+                return False
+        
+        print(f"✓ Dashboard stats retrieved successfully")
+        print(f"  - Total problems: {stats_data['total_problems']}")
+        print(f"  - Categories: {len(stats_data['categories'])}")
+        print(f"  - Top keywords: {len(stats_data['top_keywords'])}")
+        print(f"  - Top organizations: {len(stats_data['top_organizations'])}")
+        
+        # Print sample data
+        if stats_data['categories']:
+            print(f"  - Sample categories: {list(stats_data['categories'].keys())[:3]}")
+        
+        if stats_data['top_keywords']:
+            print(f"  - Top 3 keywords: {stats_data['top_keywords'][:3]}")
+        
+        if stats_data['top_organizations']:
+            print(f"  - Sample organizations: {list(stats_data['top_organizations'].keys())[:3]}")
+        
+        return True
+        
     except Exception as e:
-        print("✓ Model validation working (negative total caught)")
+        print(f"✗ Dashboard stats test failed: {e}")
+        return False
 
+def test_category_breakdown():
+    """Test category breakdown endpoint."""
+    print("\nTesting category breakdown...")
+    try:
+        response = requests.get(f"{API_BASE_URL}/dashboard/categories", timeout=10)
+        response.raise_for_status()
+        
+        breakdown_data = response.json()
+        
+        if 'categories' not in breakdown_data or 'total' not in breakdown_data:
+            print("✗ Invalid category breakdown response structure")
+            return False
+        
+        print(f"✓ Category breakdown retrieved successfully")
+        print(f"  - Total problems: {breakdown_data['total']}")
+        print(f"  - Categories with percentages: {len(breakdown_data['categories'])}")
+        
+        # Print sample breakdown
+        for category, data in list(breakdown_data['categories'].items())[:3]:
+            print(f"    - {category}: {data['count']} ({data['percentage']}%)")
+        
+        return True
+        
+    except Exception as e:
+        print(f"✗ Category breakdown test failed: {e}")
+        return False
 
-async def main():
-    """Main test function."""
-    print("Starting Dashboard Service Tests...")
+def test_technology_trends():
+    """Test technology trends endpoint."""
+    print("\nTesting technology trends...")
+    try:
+        response = requests.get(f"{API_BASE_URL}/dashboard/technology-trends", timeout=10)
+        response.raise_for_status()
+        
+        trends_data = response.json()
+        
+        required_fields = ['technology_keywords', 'domain_keywords', 'total_keywords']
+        for field in required_fields:
+            if field not in trends_data:
+                print(f"✗ Missing required field in trends: {field}")
+                return False
+        
+        print(f"✓ Technology trends retrieved successfully")
+        print(f"  - Technology keywords: {len(trends_data['technology_keywords'])}")
+        print(f"  - Domain keywords: {len(trends_data['domain_keywords'])}")
+        print(f"  - Total keywords: {trends_data['total_keywords']}")
+        
+        # Print sample trends
+        if trends_data['technology_keywords']:
+            print(f"  - Top tech keywords: {trends_data['technology_keywords'][:3]}")
+        
+        if trends_data['domain_keywords']:
+            print(f"  - Top domain keywords: {trends_data['domain_keywords'][:3]}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"✗ Technology trends test failed: {e}")
+        return False
+
+def main():
+    """Run all dashboard tests."""
+    print("=" * 50)
+    print("Dashboard API Test Suite")
+    print("=" * 50)
     
-    # Test models first
-    test_dashboard_models()
+    tests = [
+        test_dashboard_health,
+        test_dashboard_stats,
+        test_category_breakdown,
+        test_technology_trends
+    ]
     
-    # Test service functionality
-    await test_dashboard_service()
-
+    passed = 0
+    total = len(tests)
+    
+    for test in tests:
+        if test():
+            passed += 1
+    
+    print("\n" + "=" * 50)
+    print(f"Test Results: {passed}/{total} tests passed")
+    
+    if passed == total:
+        print("✓ All dashboard tests passed!")
+        sys.exit(0)
+    else:
+        print("✗ Some dashboard tests failed!")
+        sys.exit(1)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

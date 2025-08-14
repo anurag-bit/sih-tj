@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   PaperAirplaneIcon, 
-  ExclamationTriangleIcon,
   SparklesIcon,
   UserIcon,
   ChatBubbleLeftIcon
 } from '@heroicons/react/24/outline';
+import ErrorMessage from './ErrorMessage';
+import LoadingSpinner from './LoadingSpinner';
+import SkeletonCard from './SkeletonCard';
 
 interface Message {
   id: string;
@@ -184,7 +186,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
   return (
     <div className="flex flex-col h-full">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4">
         {messages.length === 0 && (
           <div className="text-center py-8">
             <SparklesIcon className="w-12 h-12 text-gray-500 mx-auto mb-4" />
@@ -219,35 +221,35 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
             key={message.id}
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`flex max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`flex max-w-[85%] sm:max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
               {/* Avatar */}
-              <div className={`flex-shrink-0 ${message.type === 'user' ? 'ml-3' : 'mr-3'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              <div className={`flex-shrink-0 ${message.type === 'user' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'}`}>
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center ${
                   message.type === 'user' 
                     ? 'bg-electric-blue' 
                     : 'bg-gray-600'
                 }`}>
                   {message.type === 'user' ? (
-                    <UserIcon className="w-4 h-4 text-white" />
+                    <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                   ) : (
-                    <ChatBubbleLeftIcon className="w-4 h-4 text-white" />
+                    <ChatBubbleLeftIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                   )}
                 </div>
               </div>
 
               {/* Message Content */}
-              <div className={`rounded-lg px-4 py-3 ${
+              <div className={`rounded-lg px-3 py-2 sm:px-4 sm:py-3 ${
                 message.type === 'user'
                   ? 'bg-electric-blue text-white'
                   : 'bg-gray-700 text-gray-100'
               }`}>
-                <div className="whitespace-pre-wrap break-words">
+                <div className="whitespace-pre-wrap break-words text-sm sm:text-base">
                   {message.content}
                   {message.isStreaming && (
-                    <span className="inline-block w-2 h-5 bg-current ml-1 animate-pulse" />
+                    <span className="inline-block w-2 h-4 sm:h-5 bg-current ml-1 animate-pulse" />
                   )}
                 </div>
-                <div className={`text-xs mt-2 ${
+                <div className={`text-xs mt-1 sm:mt-2 ${
                   message.type === 'user' ? 'text-blue-100' : 'text-gray-400'
                 }`}>
                   {message.timestamp.toLocaleTimeString([], { 
@@ -262,23 +264,24 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
-            <div className="flex items-center space-x-3">
-              <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
-              <div>
-                <h4 className="text-red-400 font-medium">Error</h4>
-                <p className="text-red-300 text-sm">{error}</p>
-              </div>
-            </div>
-          </div>
+          <ErrorMessage
+            error={error}
+            title="Chat Error"
+            onRetry={() => {
+              setError(null);
+              // Optionally retry the last message
+            }}
+            retryLabel="Dismiss"
+            className="mx-4"
+          />
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-700 p-4">
-        <form onSubmit={handleSubmit} className="flex space-x-3">
+      <div className="border-t border-gray-700 p-3 sm:p-4">
+        <form onSubmit={handleSubmit} className="flex space-x-2 sm:space-x-3">
           <div className="flex-1 relative">
             <textarea
               ref={textareaRef}
@@ -286,7 +289,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask a question about this problem..."
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-electric-blue focus:ring-1 focus:ring-electric-blue resize-none min-h-[48px] max-h-[120px]"
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-white placeholder-gray-400 focus:outline-none focus:border-electric-blue focus:ring-1 focus:ring-electric-blue resize-none min-h-[44px] sm:min-h-[48px] max-h-[120px] text-sm sm:text-base touch-manipulation"
               disabled={isLoading}
               rows={1}
             />
@@ -294,28 +297,28 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
           <button
             type="submit"
             disabled={!inputValue.trim() || isLoading}
-            className="flex-shrink-0 bg-electric-blue hover:bg-electric-blue/80 disabled:bg-gray-600 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-colors duration-150"
+            className="flex-shrink-0 bg-electric-blue hover:bg-electric-blue/80 disabled:bg-gray-600 disabled:cursor-not-allowed text-white p-2 sm:p-3 rounded-lg transition-colors duration-150 touch-manipulation"
           >
             {isLoading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+              <LoadingSpinner size="sm" color="white" />
             ) : (
-              <PaperAirplaneIcon className="w-5 h-5" />
+              <PaperAirplaneIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             )}
           </button>
         </form>
         
         {/* Quick Suggestions */}
         {messages.length > 0 && suggestedQuestions.length > 0 && (
-          <div className="mt-3">
-            <div className="flex flex-wrap gap-2">
+          <div className="mt-2 sm:mt-3">
+            <div className="flex flex-wrap gap-1 sm:gap-2">
               {suggestedQuestions.slice(0, 3).map((question, index) => (
                 <button
                   key={index}
                   onClick={() => handleSuggestedQuestion(question)}
-                  className="text-xs px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded-full transition-colors duration-150"
+                  className="text-xs px-2 py-1 sm:px-3 sm:py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded-full transition-colors duration-150 touch-manipulation"
                   disabled={isLoading}
                 >
-                  {question.length > 50 ? question.substring(0, 50) + '...' : question}
+                  {question.length > 40 ? question.substring(0, 40) + '...' : question}
                 </button>
               ))}
             </div>
