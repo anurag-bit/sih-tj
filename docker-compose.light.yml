@@ -14,11 +14,11 @@ services:
     networks:
       - sih-network
 
-  # Backend service
+  # Backend service - using light requirements
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.light
     ports:
       - "8000:8000"
     environment:

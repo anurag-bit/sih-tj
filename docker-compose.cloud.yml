@@ -1,9 +1,7 @@
 services:
-  # Frontend service
+  # Frontend service - using pre-built image
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/your-username/sih-solvers-compass-frontend:latest
     ports:
       - "80:80"
     environment:
@@ -14,11 +12,9 @@ services:
     networks:
       - sih-network
 
-  # Backend service
+  # Backend service - using pre-built image
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/anurag-bit/sih-solvers-compass-backend:latest
     ports:
       - "8000:8000"
     environment:
