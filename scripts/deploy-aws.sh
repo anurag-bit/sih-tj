@@ -13,8 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-TERRAFORM_DIR="infrastructure/terraform-aws"
-K8S_DIR="infrastructure/k8s"
+TERRAFORM_DIR="../infrastructure/terraform-aws"
+K8S_DIR="../infrastructure/k8s"
 
 echo -e "${BLUE}🚀 SIH Solver's Compass - One-Click AWS Deployment${NC}"
 echo "=================================================="
