@@ -102,46 +102,79 @@ class SIHDataIngester:
         try:
             logger.info(f"Downloading data from HuggingFace: {dataset_url}")
             
-            with httpx.Client(timeout=30.0) as client:
-                response = client.get(dataset_url)
-                response.raise_for_status()
+            # For HuggingFace datasets, we need to use the datasets library
+            try:
+                from datasets import load_dataset
+                logger.info("Using HuggingFace datasets library to load SIH2024 dataset")
                 
-                # Parse JSON data
-                data = response.json()
-                logger.info(f"Downloaded {len(data)} problem statements")
+                # Load the dataset
+                dataset = load_dataset("prof-freakenstein/SIH2024")
+                
+                # Convert to list of dictionaries
+                data = []
+                for split_name in dataset.keys():
+                    logger.info(f"Processing split: {split_name}")
+                    split_data = dataset[split_name]
+                    for item in split_data:
+                        data.append(dict(item))
+                
+                logger.info(f"Downloaded {len(data)} problem statements from HuggingFace dataset")
                 return data
                 
-        except httpx.HTTPError as e:
-            raise DataIngestionError(f"HTTP error downloading data: {str(e)}")
-        except json.JSONDecodeError as e:
-            raise DataIngestionError(f"JSON decode error: {str(e)}")
+            except ImportError:
+                logger.warning("HuggingFace datasets library not available, trying direct HTTP download")
+                # Fallback to direct HTTP download
+                with httpx.Client(timeout=30.0) as client:
+                    response = client.get(dataset_url)
+                    response.raise_for_status()
+                    
+                    # Parse JSON data
+                    data = response.json()
+                    logger.info(f"Downloaded {len(data)} problem statements via HTTP")
+                    return data
+                
         except Exception as e:
-            raise DataIngestionError(f"Unexpected error downloading data: {str(e)}")
+            logger.error(f"Failed to download from HuggingFace: {str(e)}")
+            raise DataIngestionError(f"HuggingFace download failed: {str(e)}")
     
     def validate_problem_statement(self, data: Dict[str, Any]) -> Optional[ProblemStatement]:
         """Validate and clean a single problem statement."""
         try:
+            # Handle the actual SIH2024 dataset format
+            problem_id = data.get("id", f"sih2024_{hash(str(data)) % 100000}")
+            title = data.get("title", "").strip()
+            category = data.get("category", "General").strip()
+            subcategory = data.get("subcategory", "").strip()
+            organization = data.get("organization", "Unknown").strip()
+            description = data.get("text", "").strip()  # 'text' field contains the description
+            
+            # Combine category and subcategory for better categorization
+            if subcategory and subcategory != category:
+                full_category = f"{category} - {subcategory}"
+            else:
+                full_category = category
+            
+            # Extract technology stack from description text
+            tech_stack = self._extract_tech_stack_from_text(description)
+            
+            # Determine difficulty level based on description complexity and keywords
+            difficulty = self._determine_difficulty_level(description, tech_stack)
+            
             # Ensure required fields exist with defaults
             cleaned_data = {
-                "id": data.get("id", f"problem_{hash(str(data))}"),
-                "title": data.get("title", "").strip(),
-                "organization": data.get("organization", "Unknown").strip(),
-                "category": data.get("category", "General").strip(),
-                "description": data.get("description", "").strip(),
-                "technology_stack": data.get("technology_stack", []),
-                "difficulty_level": data.get("difficulty_level", "Medium").strip()
+                "id": str(problem_id).strip(),
+                "title": str(title).strip(),
+                "organization": str(organization).strip(),
+                "category": str(full_category).strip(),
+                "description": str(description).strip(),
+                "technology_stack": tech_stack,
+                "difficulty_level": str(difficulty).strip()
             }
             
             # Validate required fields are not empty
             if not cleaned_data["title"] or not cleaned_data["description"]:
                 logger.warning(f"Skipping problem with missing title or description: {cleaned_data['id']}")
                 return None
-            
-            # Ensure technology_stack is a list
-            if isinstance(cleaned_data["technology_stack"], str):
-                cleaned_data["technology_stack"] = [cleaned_data["technology_stack"]]
-            elif not isinstance(cleaned_data["technology_stack"], list):
-                cleaned_data["technology_stack"] = []
             
             return ProblemStatement(**cleaned_data)
             
@@ -151,6 +184,69 @@ class SIHDataIngester:
         except Exception as e:
             logger.warning(f"Unexpected error validating problem statement: {str(e)}")
             return None
+    
+    def _extract_tech_stack_from_text(self, text: str) -> List[str]:
+        """Extract technology stack from problem description text."""
+        if not text:
+            return []
+        
+        # Common technology keywords to look for
+        tech_keywords = {
+            # Programming Languages
+            'python', 'java', 'javascript', 'typescript', 'c++', 'c#', 'php', 'ruby', 'go', 'rust',
+            # Web Technologies
+            'react', 'angular', 'vue', 'nodejs', 'express', 'django', 'flask', 'spring', 'laravel',
+            # Mobile
+            'android', 'ios', 'flutter', 'react native', 'kotlin', 'swift',
+            # Databases
+            'mysql', 'postgresql', 'mongodb', 'redis', 'sqlite', 'oracle', 'cassandra',
+            # Cloud & DevOps
+            'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'jenkins', 'terraform',
+            # AI/ML
+            'tensorflow', 'pytorch', 'scikit-learn', 'opencv', 'nlp', 'machine learning', 'deep learning',
+            # Other
+            'blockchain', 'iot', 'api', 'rest', 'graphql', 'microservices', 'websocket'
+        }
+        
+        text_lower = text.lower()
+        found_tech = []
+        
+        for tech in tech_keywords:
+            if tech in text_lower:
+                # Capitalize first letter for consistency
+                found_tech.append(tech.title())
+        
+        # Remove duplicates and return
+        return list(set(found_tech))
+    
+    def _determine_difficulty_level(self, description: str, tech_stack: List[str]) -> str:
+        """Determine difficulty level based on description and tech stack."""
+        if not description:
+            return "Medium"
+        
+        description_lower = description.lower()
+        
+        # Hard indicators
+        hard_keywords = [
+            'machine learning', 'deep learning', 'ai', 'blockchain', 'microservices',
+            'distributed', 'scalable', 'real-time', 'big data', 'cloud', 'kubernetes'
+        ]
+        
+        # Easy indicators
+        easy_keywords = [
+            'simple', 'basic', 'crud', 'static', 'prototype', 'demo'
+        ]
+        
+        hard_score = sum(1 for keyword in hard_keywords if keyword in description_lower)
+        easy_score = sum(1 for keyword in easy_keywords if keyword in description_lower)
+        tech_complexity = len(tech_stack)
+        
+        if hard_score >= 2 or tech_complexity >= 5:
+            return "Hard"
+        elif easy_score >= 1 or tech_complexity <= 2:
+            return "Easy"
+        else:
+            return "Medium"
     
     def generate_embeddings(self, problems: List[ProblemStatement]) -> List[List[float]]:
         """Generate vector embeddings for problem statements."""
@@ -377,11 +473,8 @@ def main():
     chroma_host = os.getenv("CHROMA_HOST", "localhost")
     chroma_port = int(os.getenv("CHROMA_PORT", "8001"))
     
-    # HuggingFace dataset URL (placeholder - replace with actual dataset)
-    dataset_url = os.getenv(
-        "HUGGINGFACE_DATASET_URL", 
-        "https://huggingface.co/datasets/sih-problems/raw/main/problems.json"
-    )
+    # HuggingFace dataset identifier
+    dataset_name = os.getenv("HUGGINGFACE_DATASET", "prof-freakenstein/SIH2024")
     
     # Initialize ingester
     ingester = SIHDataIngester(chroma_host=chroma_host, chroma_port=chroma_port)
@@ -389,7 +482,7 @@ def main():
     try:
         # Try to download from HuggingFace first
         logger.info("Starting data ingestion process...")
-        result = ingester.ingest_data(dataset_url)
+        result = ingester.ingest_data(dataset_name)
         
         if result["status"] == "failed" and "HTTP" in str(result.get("error", "")):
             # If HuggingFace download fails, use sample data

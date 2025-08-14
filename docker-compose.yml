@@ -28,26 +28,24 @@ services:
       - ENVIRONMENT=production
     env_file:
       - .env
-    depends_on:
-      - chroma-db
     restart: unless-stopped
     networks:
       - sih-network
 
-  # ChromaDB service
-  chroma-db:
-    image: ghcr.io/chroma-core/chroma:0.4.15
-    ports:
-      - "8001:8000"
-    volumes:
-      - chroma-data:/chroma/chroma
-    environment:
-      - IS_PERSISTENT=TRUE
-      - PERSIST_DIRECTORY=/chroma/chroma
-      - ANONYMIZED_TELEMETRY=FALSE
-    restart: unless-stopped
-    networks:
-      - sih-network
+  # ChromaDB service - commented out for now to focus on chat functionality
+  # chroma-db:
+  #   image: ghcr.io/chroma-core/chroma:0.4.15
+  #   ports:
+  #     - "8001:8000"
+  #   volumes:
+  #     - chroma-data:/chroma/chroma
+  #   environment:
+  #     - IS_PERSISTENT=TRUE
+  #     - PERSIST_DIRECTORY=/chroma/chroma
+  #     - ANONYMIZED_TELEMETRY=FALSE
+  #   restart: unless-stopped
+  #   networks:
+  #     - sih-network
 
 # Named volumes for data persistence
 volumes:
