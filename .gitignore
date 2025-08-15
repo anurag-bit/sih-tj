@@ -40,3 +40,4 @@ backend/app/services/__pycache__/dashboard_service.cpython-310.pyc
 backend/app/services/__pycache__/github_service.cpython-310.pyc
 backend/app/services/__pycache__/search_service.cpython-310.pyc
 __pycache__
+dist

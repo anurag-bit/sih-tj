@@ -16,9 +16,9 @@ const AppLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-charcoal font-inter">
+    <div className="min-h-screen bg-dark-charcoal font-inter safe-area-inset">
       <Header onToggleSidebar={toggleSidebar} />
-      <div className="flex">
+      <div className="flex overflow-hidden">
         <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
         <main className="flex-1 p-4 sm:p-6 lg:ml-0">
           <ErrorBoundary>

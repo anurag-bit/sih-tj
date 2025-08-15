@@ -7,7 +7,6 @@ import {
 } from '@heroicons/react/24/outline';
 import ErrorMessage from './ErrorMessage';
 import LoadingSpinner from './LoadingSpinner';
-import SkeletonCard from './SkeletonCard';
 
 interface Message {
   id: string;
@@ -186,7 +185,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
   return (
     <div className="flex flex-col h-full">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4">
+  <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4 pb-20 sm:pb-6">
         {messages.length === 0 && (
           <div className="text-center py-8">
             <SparklesIcon className="w-12 h-12 text-gray-500 mx-auto mb-4" />
@@ -279,8 +278,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="border-t border-gray-700 p-3 sm:p-4">
+  {/* Input Area */}
+  <div className="border-t border-gray-700 p-3 sm:p-4 sticky bottom-0 bg-gray-800/95 backdrop-blur supports-[backdrop-filter]:bg-gray-800/80">
         <form onSubmit={handleSubmit} className="flex space-x-2 sm:space-x-3">
           <div className="flex-1 relative">
             <textarea
@@ -309,7 +308,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
         
         {/* Quick Suggestions */}
         {messages.length > 0 && suggestedQuestions.length > 0 && (
-          <div className="mt-2 sm:mt-3">
+          <div className="mt-2 sm:mt-3 pb-[env(safe-area-inset-bottom)]">
             <div className="flex flex-wrap gap-1 sm:gap-2">
               {suggestedQuestions.slice(0, 3).map((question, index) => (
                 <button
