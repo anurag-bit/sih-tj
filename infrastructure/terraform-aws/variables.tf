@@ -15,3 +15,27 @@ variable "gemini_api_key" {
   type        = string
   sensitive   = true
 }
+
+variable "instance_types" {
+  description = "The instance types for the EKS node group."
+  type        = list(string)
+  default     = ["t3.medium"]
+}
+
+variable "desired_size" {
+  description = "The desired number of nodes in the EKS node group."
+  type        = number
+  default     = 2
+}
+
+variable "max_size" {
+  description = "The maximum number of nodes in the EKS node group."
+  type        = number
+  default     = 3
+}
+
+variable "min_size" {
+  description = "The minimum number of nodes in the EKS node group."
+  type        = number
+  default     = 1
+}
