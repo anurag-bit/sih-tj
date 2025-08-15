@@ -8,5 +8,6 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  # Force deployments to a single region to avoid aws_regions issues
+  region = "us-east-1"
 }
