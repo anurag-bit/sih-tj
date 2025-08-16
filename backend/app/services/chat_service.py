@@ -47,14 +47,7 @@ Please answer the following question about this specific problem statement:"""
         """
         if not problem_context or len(problem_context.strip()) < 50:
             return False
-        
-        # Check for key elements that should be in a problem statement
-        required_elements = ['problem', 'solution', 'technology', 'develop', 'implement']
-        context_lower = problem_context.lower()
-        
-        # At least 2 of these elements should be present
-        present_elements = sum(1 for element in required_elements if element in context_lower)
-        return present_elements >= 2
+        return True
 
     async def generate_response(self, problem_context: str, user_question: str) -> str:
         """
