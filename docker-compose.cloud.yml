@@ -32,7 +32,7 @@ services:
 
   # ChromaDB service
   chroma-db:
-    image: ghcr.io/chroma-core/chroma:0.4.15
+    image: ghcr.io/chroma-core/chroma:0.4.22
     ports:
       - "8001:8000"
     volumes:

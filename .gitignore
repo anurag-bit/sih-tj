@@ -43,3 +43,9 @@ __pycache__
 dist
 node_modules/
 node_modules/.vite
+
+# Python virtual environments
+venv/
+env/
+test_env/
+*_env/
