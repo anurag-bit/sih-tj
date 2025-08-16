@@ -10,4 +10,4 @@ python-dotenv==1.0.0
 google-generativeai==0.3.2
 requests==2.31.0
 numpy==2.2.1
-datasets==2.16.1
+datasets==1.24.4
