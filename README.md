@@ -2,77 +2,111 @@
 
 An AI-powered guidance platform designed to help engineering students discover and engage with Smart India Hackathon problem statements.
 
-## Quick Start
+## Local Development
 
-1. **Clone the repository and navigate to the project directory**
+### 1. Prerequisites
+- Docker and Docker Compose
 
-2. **Set up environment variables:**
-   ```bash
-   cp .env.template .env
-   # Edit .env file with your API keys
-   ```
+### 2. Quick Start
 
-3. **Start the application:**
-   ```bash
-   docker-compose up
-   ```
+1.  **Clone the repository and navigate to the project directory**
 
-4. **Access the application:**
-   - Frontend: http://localhost:80
-   - Backend API: http://localhost:8000
-   - ChromaDB: http://localhost:8001
+2.  **Set up environment variables:**
+    ```bash
+    cp .env.template .env
+    # Edit .env file with your API keys (at least GEMINI_API_KEY)
+    ```
+
+3.  **Start the application:**
+    ```bash
+    docker-compose up --build
+    ```
+
+4.  **Access the application:**
+    -   Frontend: http://localhost:80
+    -   Backend API: http://localhost:8000
+    -   ChromaDB: http://localhost:8001
+
+## Cloud Deployment (GCP, AWS, Azure)
+
+This project includes one-click deployment scripts to provision and deploy the entire application to a Kubernetes cluster on your cloud provider of choice.
+
+### 1. Prerequisites
+
+- **Common Tools:** `terraform`, `kubectl`, `docker`
+- **Cloud-Specific CLI:**
+  - **GCP:** `gcloud`
+  - **AWS:** `aws`
+  - **Azure:** `az`
+
+### 2. Configuration
+
+Update your `.env` file with the required variables for your target platform:
+
+- **GCP:**
+  ```
+  GCP_PROJECT_ID="your-gcp-project-id"
+  GEMINI_API_KEY="your-gemini-key"
+  ```
+- **AWS:**
+  ```
+  AWS_REGION="us-east-1"
+  GEMINI_API_KEY="your-gemini-key"
+  ```
+- **Azure:**
+  ```
+  AZURE_LOCATION="East US"
+  AZURE_RESOURCE_GROUP="sih-solvers-compass-rg"
+  GEMINI_API_KEY="your-gemini-key"
+  ```
+
+### 3. Deploy
+
+Run the deployment script for your target platform. The script will automatically provision the infrastructure, build and push the container images, and deploy the application. At the end, it will provide a URL to access the frontend.
+
+- **For GCP:**
+  ```bash
+  ./scripts/deploy-gcp.sh
+  ```
+- **For AWS:**
+  ```bash
+  ./scripts/deploy-aws.sh
+  ```
+- **For Azure:**
+  ```bash
+  ./scripts/deploy-azure.sh
+  ```
+
+### 4. Destroy Infrastructure
+
+To tear down all cloud resources and avoid ongoing costs, use the generic destroy script with the appropriate platform flag.
+
+- **For GCP:**
+  ```bash
+  ./scripts/destroy.sh gcp
+  ```
+- **For AWS:**
+  ```bash
+  ./scripts/destroy.sh aws
+  ```
+- **For Azure:**
+  ```bash
+  ./scripts/destroy.sh azure
+  ```
 
 ## Project Structure
 
 ```
 sih-solvers-compass/
 ├── backend/                 # FastAPI backend service
-│   ├── app/                # Application code
-│   ├── Dockerfile          # Backend container configuration
-│   └── requirements.txt    # Python dependencies
 ├── frontend/               # React frontend application
-│   ├── src/               # Source code
-│   ├── Dockerfile         # Frontend container configuration
-│   └── package.json       # Node.js dependencies
-├── scripts/               # Utility scripts
-│   └── ingest_data.py     # Data ingestion script
-├── docker-compose.yml     # Multi-service orchestration
+├── infrastructure/          # Terraform configurations for cloud deployments
+│   ├── k8s/                 # Kubernetes manifests
+│   ├── terraform-aws/
+│   ├── terraform-azure/
+│   └── terraform-gcp/
+├── scripts/               # Deployment and utility scripts
+├── docker-compose.yml     # Local multi-service orchestration
 ├── .env.template         # Environment variables template
 └── README.md             # This file
 ```
-
-## Services
-
-- **Frontend**: React application with Tailwind CSS
-- **Backend**: FastAPI with Python 3.10
-- **ChromaDB**: Vector database for semantic search
-
-## Development
-
-For development mode, you can run services individually:
-
-```bash
-# Backend development
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Frontend development
-cd frontend
-npm install
-npm run dev
-```
-
-## Environment Variables
-
-See `.env.template` for required environment variables. Key variables:
-
-- `GEMINI_API_KEY`: Google Gemini API key for chat functionality
-- `GITHUB_TOKEN`: GitHub API token (optional, for enhanced rate limits)
-- `CHROMA_HOST`: ChromaDB host (default: chroma-db)
-
-## Next Steps
-
-1. Configure your API keys in the `.env` file
-2. Run the data ingestion script to populate the vector database
-3. Start developing additional features as per the implementation plan
