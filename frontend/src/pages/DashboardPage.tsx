@@ -4,115 +4,84 @@ import CategoryChart from '../components/ui/CategoryChart';
 import OrganizationChart from '../components/ui/OrganizationChart';
 import WordCloud from '../components/ui/WordCloud';
 import ErrorMessage from '../components/ui/ErrorMessage';
-import SkeletonCard from '../components/ui/SkeletonCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import { ChartBarIcon, BuildingOfficeIcon, TagIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, BuildingOfficeIcon, TagIcon, CubeIcon } from '@heroicons/react/24/outline';
+
+const StatCard = ({ title, value, icon: Icon, color }) => (
+  <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700/50">
+    <div className="flex items-center">
+      <div className={`w-12 h-12 rounded-lg flex items-center justify-center bg-${color}-500/10 text-${color}-400`}>
+        <Icon className="w-6 h-6" />
+      </div>
+      <div className="ml-4">
+        <p className="text-sm text-gray-400">{title}</p>
+        <p className="text-2xl font-bold text-white">{value}</p>
+      </div>
+    </div>
+  </div>
+);
 
 const DashboardPage: React.FC = () => {
   const { stats, loading, error, refetch } = useDashboard();
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-0">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 sm:mb-8">SIH Landscape Dashboard</h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <ErrorMessage
           error={error}
           title="Dashboard Loading Failed"
           onRetry={refetch}
-          retryLabel="Reload Dashboard"
-          showDetails={process.env.NODE_ENV === 'development'}
         />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-0">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">SIH Landscape Dashboard</h1>
-        <p className="text-gray-400 text-sm sm:text-base">
-          Explore the Smart India Hackathon problem landscape with interactive visualizations
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+          SIH Landscape Dashboard
+        </h1>
+        <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-400">
+          Interactive insights into the Smart India Hackathon ecosystem.
         </p>
-        {stats && (
-          <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-300">
-            <span className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="hidden sm:inline">Total Problems:</span>
-              <span className="sm:hidden">Problems:</span>
-              {stats.total_problems}
-            </span>
-            <span className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              Categories: {Object.keys(stats.categories).length}
-            </span>
-            <span className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span className="hidden sm:inline">Organizations:</span>
-              <span className="sm:hidden">Orgs:</span>
-              {Object.keys(stats.top_organizations).length}
-            </span>
-          </div>
-        )}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-        {/* Categories Chart */}
-        <div className="bg-gray-800 rounded-xl p-4 sm:p-6">
-          <div className="flex items-center gap-3 mb-4 sm:mb-6">
-            <ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
-            <h2 className="text-lg sm:text-xl font-semibold text-white">Problems by Category</h2>
-          </div>
-          <CategoryChart 
-            data={stats?.categories || {}} 
-            loading={loading}
-          />
+      {loading && !stats ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[...Array(3)].map(i => <div key={i} className="h-32 bg-gray-800/50 rounded-xl animate-pulse" />)}
         </div>
+      ) : stats && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <StatCard title="Total Problems" value={stats.total_problems} icon={CubeIcon} color="blue" />
+          <StatCard title="Categories" value={Object.keys(stats.categories).length} icon={ChartBarIcon} color="green" />
+          <StatCard title="Organizations" value={Object.keys(stats.top_organizations).length} icon={BuildingOfficeIcon} color="purple" />
+        </div>
+      )}
 
-        {/* Organizations Chart */}
-        <div className="bg-gray-800 rounded-xl p-4 sm:p-6">
-          <div className="flex items-center gap-3 mb-4 sm:mb-6">
-            <BuildingOfficeIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
-            <h2 className="text-lg sm:text-xl font-semibold text-white">Top Organizations</h2>
-          </div>
-          <OrganizationChart 
-            data={stats?.top_organizations || {}} 
-            loading={loading}
-          />
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="lg:col-span-3 bg-gray-800/50 p-6 rounded-xl border border-gray-700/50">
+          <h2 className="text-xl font-semibold text-white mb-4">Problems by Category</h2>
+          <CategoryChart data={stats?.categories || {}} loading={loading} />
+        </div>
+        <div className="lg:col-span-2 bg-gray-800/50 p-6 rounded-xl border border-gray-700/50">
+          <h2 className="text-xl font-semibold text-white mb-4">Top Organizations</h2>
+          <OrganizationChart data={stats?.top_organizations || {}} loading={loading} />
         </div>
       </div>
 
-      {/* Word Cloud */}
-      <div className="bg-gray-800 rounded-xl p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-          <div className="flex items-center gap-3">
-            <TagIcon className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />
-            <h2 className="text-lg sm:text-xl font-semibold text-white">Popular Keywords & Technologies</h2>
-          </div>
-          <span className="text-sm text-gray-400">
-            ({stats?.top_keywords?.length || 0} keywords)
-          </span>
-        </div>
-        <WordCloud 
-          data={stats?.top_keywords || []} 
-          loading={loading}
-        />
+      <div className="mt-8 bg-gray-800/50 p-6 rounded-xl border border-gray-700/50">
+        <h2 className="text-xl font-semibold text-white mb-4">Popular Keywords</h2>
+        <WordCloud data={stats?.top_keywords || []} loading={loading} />
       </div>
-
-      {/* Refresh Button */}
-      <div className="mt-6 flex justify-center">
+      
+      <div className="mt-12 text-center">
         <button
           onClick={refetch}
           disabled={loading}
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-150 flex items-center gap-2"
+          className="px-6 py-3 bg-electric-blue text-white rounded-lg hover:bg-blue-600 transition-colors duration-150 disabled:opacity-50"
         >
-          {loading ? (
-            <>
-              <LoadingSpinner size="sm" color="white" />
-              Loading...
-            </>
-          ) : (
-            'Refresh Data'
-          )}
+          {loading ? <LoadingSpinner /> : 'Refresh Dashboard'}
         </button>
       </div>
     </div>

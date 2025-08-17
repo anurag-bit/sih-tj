@@ -49,3 +49,16 @@ venv/
 env/
 test_env/
 *_env/
+frontend/node_modules/.vite/deps/_metadata.json
+frontend/node_modules/.vite/deps/_metadata.json
+frontend/node_modules/.vite/deps/@heroicons_react_24_outline.js
+frontend/node_modules/.vite/deps/chunk-AMZ7Q62Q.js
+frontend/node_modules/.vite/deps/chunk-AMZ7Q62Q.js.map
+frontend/node_modules/.vite/deps/chunk-XHCDW3LY.js
+frontend/node_modules/.vite/deps/chunk-XHCDW3LY.js.map
+frontend/node_modules/.vite/deps/react_jsx-dev-runtime.js
+frontend/node_modules/.vite/deps/react_jsx-runtime.js
+frontend/node_modules/.vite/deps/react-dom_client.js
+frontend/node_modules/.vite/deps/react-dom.js
+frontend/node_modules/.vite/deps/react-router-dom.js
+frontend/node_modules/.vite/deps/react.js
