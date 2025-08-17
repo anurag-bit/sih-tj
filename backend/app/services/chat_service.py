@@ -1,39 +1,33 @@
 """
-Chat service for interactive problem statement exploration using Google Gemini API.
+Chat service for interactive problem statement exploration using OpenRouter.
 """
-import logging
-from typing import AsyncGenerator, Optional
-import google.generativeai as genai
-from ..config import settings
+import httpx
+import json
+from typing import AsyncGenerator, List, Dict
 
-logger = logging.getLogger(__name__)
-
+from loguru import logger
+from app.config import settings
+from app.models import ChatRequest, ChatResponse, ProblemStatement
 
 class ChatService:
-    """Service for handling chat interactions with Gemini API."""
-    
+    """Service for handling chat interactions with OpenRouter."""
+
     def __init__(self):
-        """Initialize the chat service with Gemini API configuration."""
-        if not settings.gemini_api_key:
-            raise ValueError("GEMINI_API_KEY environment variable is required")
+        """Initialize the chat service with OpenRouter API configuration."""
+        if not settings.openrouter_api_key:
+            raise ValueError("OPENROUTER_API_KEY environment variable is required")
         
-        genai.configure(api_key=settings.gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
-        
-        # System prompt template for problem statement context
-        self.system_prompt = """You are an AI assistant helping engineering students understand Smart India Hackathon problem statements. 
-
-IMPORTANT CONSTRAINTS:
-- You can ONLY answer questions about the specific problem statement provided in the context
-- If information is not available in the problem context, explicitly state "This information is not available in the problem statement"
-- Do not make assumptions or provide information not present in the context
-- Keep responses focused, practical, and helpful for students evaluating this problem
-- Suggest possible approaches, tech stacks, or considerations based only on what's described in the problem
-
-PROBLEM CONTEXT:
-{problem_context}
-
-Please answer the following question about this specific problem statement:"""
+        self.api_key = settings.openrouter_api_key
+        self.api_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        # Define a default set of models to use as a fallback
+        self.default_models = [
+            "openai/gpt-3.5-turbo",
+            "google/gemini-flash-1.5",
+        ]
 
     def _validate_context(self, problem_context: str) -> bool:
         """
@@ -49,109 +43,127 @@ Please answer the following question about this specific problem statement:"""
             return False
         return True
 
-    async def generate_response(self, problem_context: str, user_question: str) -> str:
+    async def generate_response(self, problem_context: str, user_question: str, model: str = None) -> str:
         """
-        Generate a response to user's question about the problem statement.
-        
+        Generates a non-streaming response from OpenRouter by collecting chunks.
+
         Args:
-            problem_context: Full problem statement context
-            user_question: User's question about the problem
-            
+            problem_context: The full context of the problem statement.
+            user_question: The user's question about the problem.
+            model: The specific model to use (optional).
+
         Returns:
-            str: AI assistant's response
-            
+            str: The full generated response.
+
         Raises:
-            ValueError: If context validation fails
-            Exception: If Gemini API call fails
+            ChatServiceError: If the chat generation fails.
         """
-        # Validate context
         if not self._validate_context(problem_context):
             raise ValueError("Invalid or insufficient problem context provided")
-        
-        # Construct the full prompt
-        full_prompt = self.system_prompt.format(problem_context=problem_context)
-        full_prompt += f"\n\nQuestion: {user_question}"
-        
+
+        full_response = []
         try:
-            # Generate response using Gemini
-            response = await self._call_gemini_async(full_prompt)
-            return response
-            
+            async for chunk in self.generate_streaming_response(problem_context, user_question, model):
+                full_response.append(chunk)
+            return "".join(full_response)
         except Exception as e:
-            logger.error(f"Error generating chat response: {str(e)}")
-            raise Exception(f"Failed to generate response: {str(e)}")
+            logger.error(f"Failed to generate non-streaming chat response: {str(e)}")
+            raise ChatServiceError(f"Failed to generate response: {str(e)}")
 
     async def generate_streaming_response(
-        self, 
-        problem_context: str, 
-        user_question: str
+        self,
+        problem_context: str,
+        user_question: str,
+        model: str = None
     ) -> AsyncGenerator[str, None]:
         """
-        Generate a streaming response for real-time chat interaction.
-        
+        Generates a streaming response from OpenRouter.
+
         Args:
-            problem_context: Full problem statement context
-            user_question: User's question about the problem
-            
+            problem_context: The full context of the problem statement.
+            user_question: The user's question about the problem.
+            model: The specific model to use (optional).
+
         Yields:
-            str: Response chunks as they are generated
-            
+            AsyncGenerator[str, None]: An async generator yielding response chunks.
+
         Raises:
-            ValueError: If context validation fails
-            Exception: If Gemini API call fails
+            ChatServiceError: If the chat generation fails.
         """
-        # Validate context
-        if not self._validate_context(problem_context):
-            raise ValueError("Invalid or insufficient problem context provided")
+        system_prompt = (
+            """You are an AI assistant helping engineering students understand Smart India Hackathon problem statements. 
+
+IMPORTANT CONSTRAINTS:
+- You can ONLY answer questions about the specific problem statement provided in the context
+- If information is not available in the problem context, explicitly state \"This information is not available in the problem statement\"
+- Do not make assumptions or provide information not present in the context
+- Keep responses focused, practical, and helpful for students evaluating this problem
+- Suggest possible approaches, tech stacks, or considerations based only on what's described in the problem
+
+PROBLEM CONTEXT:
+{problem_context}
+
+Please answer the following question about this specific problem statement:"""
+        )
         
-        # Construct the full prompt
-        full_prompt = self.system_prompt.format(problem_context=problem_context)
-        full_prompt += f"\n\nQuestion: {user_question}"
-        
+        messages = [
+            {"role": "system", "content": system_prompt.format(problem_context=problem_context)},
+            {"role": "user", "content": f"Question: {user_question}"}
+        ]
+
+        # Use the specified model or fall back to the default list
+        models_to_use = [model] if model else self.default_models
+
+        payload = {
+            "models": models_to_use,
+            "messages": messages,
+            "stream": True,
+        }
+
         try:
-            # Generate streaming response using Gemini
-            async for chunk in self._call_gemini_streaming_async(full_prompt):
+            async for chunk in self._call_openrouter_streaming_async(payload):
                 yield chunk
-                
         except Exception as e:
-            logger.error(f"Error generating streaming chat response: {str(e)}")
-            raise Exception(f"Failed to generate streaming response: {str(e)}")
+            logger.error(f"Failed to generate streaming chat response: {str(e)}")
+            raise ChatServiceError(f"Failed to generate streaming response: {str(e)}")
 
-    async def _call_gemini_async(self, prompt: str) -> str:
-        """
-        Make an async call to Gemini API.
-        
-        Args:
-            prompt: The full prompt to send to Gemini
-            
-        Returns:
-            str: Generated response text
-        """
-        try:
-            response = self.model.generate_content(prompt)
-            return response.text
-        except Exception as e:
-            logger.error(f"Gemini API call failed: {str(e)}")
-            raise
 
-    async def _call_gemini_streaming_async(self, prompt: str) -> AsyncGenerator[str, None]:
+    async def _call_openrouter_streaming_async(self, payload: Dict) -> AsyncGenerator[str, None]:
         """
-        Make an async streaming call to Gemini API.
-        
+        Makes an async streaming call to the OpenRouter API.
+
         Args:
-            prompt: The full prompt to send to Gemini
-            
+            payload: The request payload for the OpenRouter API.
+
         Yields:
-            str: Response chunks as they are generated
+            AsyncGenerator[str, None]: An async generator yielding response chunks.
+        
+        Raises:
+            Exception: If the API call fails.
         """
-        try:
-            response = self.model.generate_content(prompt, stream=True)
-            for chunk in response:
-                if chunk.text:
-                    yield chunk.text
-        except Exception as e:
-            logger.error(f"Gemini streaming API call failed: {str(e)}")
-            raise
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            try:
+                async with client.stream("POST", self.api_url, headers=self.headers, json=payload) as response:
+                    response.raise_for_status()
+                    async for line in response.aiter_lines():
+                        if line.startswith("data:"):
+                            data_str = line[len("data: "):]
+                            if data_str.strip() == "[DONE]":
+                                break
+                            try:
+                                chunk_data = json.loads(data_str)
+                                content = chunk_data.get("choices", [{}])[0].get("delta", {}).get("content")
+                                if content:
+                                    yield content
+                            except json.JSONDecodeError:
+                                logger.warning(f"Received non-JSON data from stream: {data_str}")
+                                continue
+            except httpx.HTTPStatusError as e:
+                logger.error(f"OpenRouter API call failed with status {e.response.status_code}: {e.response.text}")
+                raise
+            except Exception as e:
+                logger.error(f"OpenRouter streaming API call failed: {str(e)}")
+                raise
 
     def get_suggested_questions(self) -> list[str]:
         """
@@ -170,6 +182,10 @@ Please answer the following question about this specific problem statement:"""
             "Are there any specific constraints or requirements mentioned?",
             "What kind of impact would solving this problem have?"
         ]
+
+class ChatServiceError(Exception):
+    """Custom exception for chat service errors."""
+    pass
 
 
 # Global chat service instance - initialized lazily

@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     
     # External API Keys
     gemini_api_key: str = ""
+    openrouter_api_key: str = ""
     github_token: str = ""
     
     # Database Configuration
@@ -33,6 +34,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = 'ignore'
 
 
 # Global settings instance

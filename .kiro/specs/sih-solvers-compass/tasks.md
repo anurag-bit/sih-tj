@@ -125,3 +125,12 @@
   - Create user guide for the application features
   - Document the development workflow and contribution guidelines
   - _Requirements: 6.5_
+
+- [ ] 19. Implement Dynamic Document Generation
+  - Enable users to generate problem summaries and personalized project plans.
+  - Backend (Go ai_service) generates final documents (Markdown, JSON, PDF).
+  - FastAPI backend orchestrates requests, performs LLM-based verification for rich text outputs, and handles conditional PDF conversion.
+  - Implement LLM-based verification service for generated content quality and adherence.
+  - Implement regeneration loop with feedback from verification LLM.
+  - Integrate conditional PDF conversion using WeasyPrint for Markdown/JSON outputs.
+  - _Requirements: (To be determined based on user's project requirements)_
