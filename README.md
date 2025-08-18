@@ -1,4 +1,5 @@
 # SIH Solver's Compass
+[![Build and Publish Docker Images](https://github.com/anurag-bit/sih-tj/actions/workflows/build-and-publish.yml/badge.svg)](https://github.com/anurag-bit/sih-tj/actions/workflows/build-and-publish.yml)
 
 An AI-powered guidance platform designed to help engineering students discover and engage with Smart India Hackathon problem statements.
 
