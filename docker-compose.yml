@@ -28,7 +28,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - CHROMA_HOST=chroma-db
       - CHROMA_PORT=8000
       - ENVIRONMENT=production
