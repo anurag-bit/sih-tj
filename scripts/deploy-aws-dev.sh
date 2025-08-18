@@ -47,9 +47,15 @@ if ! aws sts get-caller-identity &> /dev/null; then
 fi
 echo -e "${GREEN}✅ Logged into AWS as: $(aws sts get-caller-identity --query "Arn" --output text)${NC}"
 
-# Get Gemini API Key
+# Get required API Keys
+if [ -z "$OPENROUTER_API_KEY" ]; then
+    echo -e "${YELLOW}🔑 Please enter your OpenRouter API Key:${NC}"
+    read -s OPENROUTER_API_KEY
+    export OPENROUTER_API_KEY
+fi
+
 if [ -z "$GEMINI_API_KEY" ]; then
-    echo -e "${YELLOW}🔑 Please enter your Gemini API Key:${NC}"
+    echo -e "${YELLOW}🔑 Please enter your Gemini API Key (optional, press Enter to skip):${NC}"
     read -s GEMINI_API_KEY
     export GEMINI_API_KEY
 fi
@@ -62,7 +68,7 @@ terraform init
 
 echo "Running Terraform plan..."
 terraform plan \
-    -var="gemini_api_key=$GEMINI_API_KEY" \
+    -var="OPENROUTER_API_KEY=$OPENROUTER_API_KEY" \
     -var='instance_types=["t3.micro"]' \
     -var=desired_size=1 \
     -var=max_size=1 \
@@ -70,7 +76,7 @@ terraform plan \
 
 echo "Running Terraform apply..."
 terraform apply \
-    -var="gemini_api_key=$GEMINI_API_KEY" \
+    -var="OPENROUTER_API_KEY=$OPENROUTER_API_KEY" \
     -var='instance_types=["t3.micro"]' \
     -var=desired_size=1 \
     -var=max_size=1 \
@@ -107,7 +113,9 @@ kubectl apply -f $K8S_DIR/namespace.yaml
 # Create secrets
 echo -e "${YELLOW}🔐 Creating Kubernetes secrets...${NC}"
 kubectl create secret generic sih-secrets \
-    --from-literal=gemini-api-key="$GEMINI_API_KEY" \
+    --from-literal=openrouter-api-key="$OPENROUTER_API_KEY" \
+    --from-literal=gemini-api-key="${GEMINI_API_KEY:-}" \
+    --from-literal=github-token="${GITHUB_TOKEN:-}" \
     --namespace=sih-solvers-compass \
     --dry-run=client -o yaml | kubectl apply -f -
 

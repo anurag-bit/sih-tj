@@ -26,12 +26,25 @@ spec:
             secretKeyRef:
               name: sih-secrets
               key: gemini-api-key
+        - name: OPENROUTER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sih-secrets
+              key: openrouter-api-key
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: sih-secrets
+              key: github-token
+              optional: true
         - name: CHROMA_HOST
           value: "chromadb-service"
         - name: CHROMA_PORT
           value: "8000"
         - name: ENVIRONMENT
           value: "production"
+        - name: DEBUG
+          value: "false"
         resources:
           requests:
             memory: "2Gi"
