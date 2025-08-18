@@ -1,14 +1,19 @@
-output "ecr_repository_url" {
-  description = "The URL of the ECR repository"
-  value       = aws_ecr_repository.repo.repository_url
+output "ecr_backend_repository_url" {
+  description = "The URL of the ECR backend repository"
+  value       = aws_ecr_repository.backend.repository_url
+}
+
+output "ecr_frontend_repository_url" {
+  description = "The URL of the ECR frontend repository" 
+  value       = aws_ecr_repository.frontend.repository_url
 }
 
 output "eks_cluster_name" {
   description = "The name of the EKS cluster"
-  value       = module.eks.cluster_id
+  value       = aws_eks_cluster.main.name
 }
 
 output "aws_region" {
   description = "The AWS region where the infrastructure is deployed."
-  value       = var.aws_region # Assuming aws_region variable exists
+  value       = var.aws_region
 }
