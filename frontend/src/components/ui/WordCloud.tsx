@@ -11,7 +11,7 @@ interface WordCloudProps {
   loading?: boolean;
 }
 
-const COLORS = ['#93C5FD', '#60A5FA', '#3B82F6', '#2563EB', '#1D4ED8'];
+const COLORS = ['#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE']; // Blue shades
 
 const WordCloud: React.FC<WordCloudProps> = ({ data, loading = false }) => {
   if (loading) {
@@ -37,7 +37,7 @@ const WordCloud: React.FC<WordCloudProps> = ({ data, loading = false }) => {
 
   const getWordStyle = (keyword: KeywordData) => {
     const normalizedCount = (keyword.count - minCount) / countRange;
-    const fontSize = 12 + (normalizedCount * 24); // Scale from 12px to 36px
+    const fontSize = 12 + (normalizedCount * 24);
     const color = COLORS[Math.floor(normalizedCount * (COLORS.length - 1))];
     const fontWeight = normalizedCount > 0.6 ? 700 : 500;
 

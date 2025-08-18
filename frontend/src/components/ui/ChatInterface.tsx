@@ -175,13 +175,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
   }, [inputValue]);
 
   return (
-    <div className="flex flex-col h-full bg-gray-900/50">
+    <div className="flex flex-col h-full bg-white">
+      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.length === 0 && (
           <div className="text-center py-8">
-            <SparklesIcon className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white mb-2">Start a Conversation</h3>
-            <p className="text-gray-400 mb-6">Ask questions to get insights and guidance.</p>
+            <SparklesIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Start a Conversation</h3>
+            <p className="text-gray-500 mb-6">Ask questions to get insights and guidance.</p>
             
             {suggestedQuestions.length > 0 && (
               <div className="space-y-2">
@@ -191,7 +192,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
                     <button
                       key={index}
                       onClick={() => handleSuggestedQuestion(question)}
-                      className="text-left p-3 bg-gray-800/70 hover:bg-gray-700/70 rounded-lg text-sm text-gray-300 hover:text-white transition-colors duration-150 disabled:opacity-50"
+                      className="text-left p-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-700 hover:text-gray-900 transition-colors duration-150 disabled:opacity-50"
                       disabled={isLoading}
                     >
                       {question}
@@ -206,15 +207,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`flex items-start gap-3 max-w-[85%]`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.type === 'user' ? 'bg-electric-blue' : 'bg-gray-600'}`}>
-                {message.type === 'user' ? <UserIcon className="w-4 h-4 text-white" /> : <ChatBubbleLeftIcon className="w-4 h-4 text-white" />}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.type === 'user' ? 'bg-sih-orange' : 'bg-gray-200'}`}>
+                {message.type === 'user' ? <UserIcon className="w-4 h-4 text-white" /> : <ChatBubbleLeftIcon className="w-4 h-4 text-gray-600" />}
               </div>
-              <div className={`rounded-lg px-4 py-3 ${message.type === 'user' ? 'bg-electric-blue text-white' : 'bg-gray-700 text-gray-100'}`}>
+              <div className={`rounded-lg px-4 py-3 ${message.type === 'user' ? 'bg-sih-orange text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <div className="whitespace-pre-wrap break-words text-sm">
                   {message.content}
                   {message.isStreaming && <span className="inline-block w-2 h-4 bg-current ml-1 animate-pulse" />}
                 </div>
-                <div className={`text-xs mt-2 ${message.type === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
+                <div className={`text-xs mt-2 ${message.type === 'user' ? 'text-orange-100' : 'text-gray-500'}`}>
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
@@ -229,7 +230,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-gray-700/50 p-4 bg-gray-800/80 backdrop-blur-sm">
+      {/* Input Area */}
+      <div className="border-t border-gray-200 p-4 bg-white/80 backdrop-blur-sm">
         <form onSubmit={handleSubmit} className="flex items-center gap-3">
           <textarea
             ref={textareaRef}
@@ -237,14 +239,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask a question..."
-            className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-electric-blue resize-none"
+            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sih-blue resize-none"
             disabled={isLoading}
             rows={1}
           />
           <button
             type="submit"
             disabled={!inputValue.trim() || isLoading}
-            className="w-10 h-10 flex-shrink-0 bg-electric-blue hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-full flex items-center justify-center transition-colors"
+            className="w-10 h-10 flex-shrink-0 bg-sih-orange hover:bg-opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-full flex items-center justify-center transition-colors"
           >
             {isLoading ? <LoadingSpinner size="sm" color="white" /> : <PaperAirplaneIcon className="w-5 h-5" />}
           </button>

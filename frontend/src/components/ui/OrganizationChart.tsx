@@ -14,7 +14,7 @@ interface OrganizationChartProps {
   loading?: boolean;
 }
 
-const COLORS = ['#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE'];
+const COLORS = ['#16A34A', '#22C55E', '#4ADE80', '#86EFAC', '#BBF7D0']; // Green shades
 
 const OrganizationChart: React.FC<OrganizationChartProps> = ({ data, loading = false }) => {
   const totalProblems = Object.values(data).reduce((sum, count) => sum + count, 0);
@@ -27,7 +27,7 @@ const OrganizationChart: React.FC<OrganizationChartProps> = ({ data, loading = f
       percentage: Math.round((value / totalProblems) * 100)
     }))
     .sort((a, b) => b.value - a.value)
-    .slice(0, 5); // Show top 5 organizations
+    .slice(0, 5);
 
   if (loading) {
     return <ChartSkeleton type="pie" />;
@@ -45,19 +45,13 @@ const OrganizationChart: React.FC<OrganizationChartProps> = ({ data, loading = f
     <div className="h-96">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          <defs>
-            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#60A5FA" stopOpacity={1} />
-              <stop offset="100%" stopColor="#2563EB" stopOpacity={1} />
-            </linearGradient>
-          </defs>
           <Tooltip
-            cursor={{ fill: 'rgba(107, 114, 128, 0.1)' }}
+            cursor={{ fill: 'rgba(22, 163, 74, 0.1)' }}
             contentStyle={{
-              backgroundColor: '#1F2937',
-              border: '1px solid #374151',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E5E7EB',
               borderRadius: '0.5rem',
-              color: '#F9FAFB',
+              color: '#1F2937',
             }}
             formatter={(value: number, name: string, props: any) => [
               `${value} problems (${props.payload.percentage}%)`,
@@ -69,7 +63,7 @@ const OrganizationChart: React.FC<OrganizationChartProps> = ({ data, loading = f
             verticalAlign="bottom"
             height={36}
             iconSize={10}
-            wrapperStyle={{ fontSize: '12px', color: '#9CA3AF' }}
+            wrapperStyle={{ fontSize: '12px', color: '#4B5563' }}
           />
           <Pie
             data={chartData}

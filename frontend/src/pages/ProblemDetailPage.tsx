@@ -3,8 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeftIcon, 
   BuildingOfficeIcon, 
-  TagIcon, 
-  ClockIcon,
+  TagIcon,
   ChatBubbleLeftRightIcon,
   CodeBracketIcon,
   ScaleIcon
@@ -26,9 +25,9 @@ interface ProblemStatement {
 }
 
 const DetailItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-center text-sm text-gray-400">
-    <Icon className="w-5 h-5 mr-3 text-gray-500" />
-    <span className="font-medium text-gray-300 mr-2">{label}:</span>
+  <div className="flex items-center text-sm text-gray-600">
+    <Icon className="w-5 h-5 mr-3 text-gray-400" />
+    <span className="font-medium text-gray-700 mr-2">{label}:</span>
     <span>{value}</span>
   </div>
 );
@@ -71,10 +70,10 @@ const ProblemDetailPage: React.FC = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty?.toLowerCase()) {
-      case 'easy': return 'text-green-400';
-      case 'medium': return 'text-yellow-400';
-      case 'hard': return 'text-red-400';
-      default: return 'text-gray-400';
+      case 'easy': return 'text-green-700';
+      case 'medium': return 'text-yellow-700';
+      case 'hard': return 'text-red-700';
+      default: return 'text-gray-700';
     }
   };
 
@@ -106,7 +105,7 @@ const ProblemDetailPage: React.FC = () => {
       <div className="mb-8">
         <button
           onClick={handleBack}
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
         >
           <ArrowLeftIcon className="w-5 h-5" />
           <span>Back to results</span>
@@ -117,7 +116,7 @@ const ProblemDetailPage: React.FC = () => {
         {/* Left Pane */}
         <div className="lg:col-span-7 space-y-8">
           <div className="space-y-4">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900">
               {problem.title}
             </h1>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -127,19 +126,19 @@ const ProblemDetailPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700/50">
-            <h2 className="text-xl font-semibold text-white mb-3">Problem Description</h2>
-            <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+          <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200/80">
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">Problem Description</h2>
+            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
               {problem.description}
             </p>
           </div>
 
           {problem.technology_stack?.length > 0 && (
-            <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700/50">
-              <h2 className="text-xl font-semibold text-white mb-4">Suggested Technologies</h2>
+            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200/80">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Suggested Technologies</h2>
               <div className="flex flex-wrap gap-2">
                 {problem.technology_stack.map((tech) => (
-                  <span key={tech} className="px-3 py-1 bg-gray-700 text-gray-300 text-sm rounded-full">
+                  <span key={tech} className="px-3 py-1 bg-gray-100 text-gray-800 text-sm rounded-full">
                     {tech}
                   </span>
                 ))}
@@ -151,10 +150,10 @@ const ProblemDetailPage: React.FC = () => {
         {/* Right Pane */}
         <div className="lg:col-span-5 mt-12 lg:mt-0">
           <div className="sticky top-24">
-            <div className="bg-gray-800/50 rounded-xl border border-gray-700/50 h-[calc(100vh-12rem)] flex flex-col">
-              <div className="p-4 border-b border-gray-700/50">
-                <h2 className="text-lg font-semibold text-white flex items-center gap-3">
-                  <ChatBubbleLeftRightIcon className="w-6 h-6 text-electric-blue" />
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200/80 h-[calc(100vh-12rem)] flex flex-col">
+              <div className="p-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-3">
+                  <ChatBubbleLeftRightIcon className="w-6 h-6 text-sih-blue" />
                   <span>Ask the AI Assistant</span>
                 </h2>
               </div>

@@ -7,22 +7,17 @@
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
-    /* Prevent horizontal scrolling on mobile */
     overflow-x: hidden;
   }
   
   body {
-    @apply bg-dark-charcoal text-white;
-    /* Prevent horizontal scrolling on mobile */
+    @apply bg-light-bg text-gray-800;
     overflow-x: hidden;
-    /* Improve text rendering on mobile */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Prevent zoom on input focus on iOS */
     -webkit-text-size-adjust: 100%;
   }
   
-  /* Improve touch targets on mobile */
   button, a, input, textarea, select {
     touch-action: manipulation;
   }
@@ -30,19 +25,19 @@
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-electric-blue text-white rounded-lg hover:bg-blue-600 transition-colors duration-150;
+    @apply px-4 py-2 bg-sih-orange text-white rounded-lg hover:bg-opacity-90 transition-all duration-150;
   }
   
   .btn-secondary {
-    @apply px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors duration-150;
+    @apply px-4 py-2 bg-white text-sih-green border border-sih-green rounded-lg hover:bg-gray-100 transition-all duration-150;
   }
   
   .card {
-    @apply bg-gray-800 rounded-xl p-6 border border-gray-700;
+    @apply bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-sih-blue transition-all duration-300;
   }
   
   .input-field {
-    @apply w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-electric-blue focus:outline-none focus:ring-2 focus:ring-electric-blue/20 transition-colors duration-150;
+    @apply w-full px-4 py-3 bg-white text-gray-800 rounded-lg border border-gray-300 focus:border-sih-blue focus:outline-none focus:ring-2 focus:ring-sih-blue/20 transition-colors duration-150;
   }
 }
 
@@ -61,7 +56,6 @@
     overflow: hidden;
   }
   
-  /* Mobile-specific utilities */
   .touch-manipulation {
     touch-action: manipulation;
   }
@@ -73,7 +67,6 @@
     padding-right: env(safe-area-inset-right);
   }
   
-  /* Prevent text selection on touch devices for UI elements */
   .no-select {
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -81,9 +74,24 @@
     user-select: none;
   }
   
-  /* Smooth scrolling for mobile */
   .smooth-scroll {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
   }
 }

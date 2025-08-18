@@ -13,7 +13,7 @@ interface CategoryChartProps {
   loading?: boolean;
 }
 
-const COLORS = ['#2563EB', '#3B82F6', '#60A5FA'];
+const COLORS = ['#FB923C', '#FDBA74', '#FED7AA']; // Orange shades
 
 const CategoryChart: React.FC<CategoryChartProps> = ({ data, loading = false }) => {
   const chartData: CategoryData[] = Object.entries(data)
@@ -23,7 +23,7 @@ const CategoryChart: React.FC<CategoryChartProps> = ({ data, loading = false }) 
       fullCategory: category,
     }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 15); // Show top 15 categories
+    .slice(0, 15);
 
   if (loading) {
     return <ChartSkeleton type="bar" />;
@@ -42,15 +42,15 @@ const CategoryChart: React.FC<CategoryChartProps> = ({ data, loading = false }) 
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
-          margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+          margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
           layout="vertical"
         >
-          <CartesianGrid stroke="#374151" strokeDasharray="3 3" horizontal={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" horizontal={false} />
           <XAxis type="number" stroke="#9CA3AF" fontSize={12} />
           <YAxis
             type="category"
             dataKey="fullCategory"
-            stroke="#9CA3AF"
+            stroke="#4B5563"
             fontSize={12}
             width={120}
             tick={{
@@ -61,12 +61,12 @@ const CategoryChart: React.FC<CategoryChartProps> = ({ data, loading = false }) 
             }}
           />
           <Tooltip
-            cursor={{ fill: 'rgba(107, 114, 128, 0.1)' }}
+            cursor={{ fill: 'rgba(249, 115, 22, 0.1)' }}
             contentStyle={{
-              backgroundColor: '#1F2937',
-              border: '1px solid #374151',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E5E7EB',
               borderRadius: '0.5rem',
-              color: '#F9FAFB',
+              color: '#1F2937',
             }}
             labelStyle={{ fontWeight: 'bold' }}
           />

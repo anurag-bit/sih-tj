@@ -36,36 +36,28 @@ const ProblemCard: React.FC<ProblemCardProps> = ({
   };
 
   const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
+    switch (difficulty?.toLowerCase()) {
       case 'easy':
-        return 'bg-green-500/10 text-green-400';
+        return 'bg-green-100 text-green-800';
       case 'medium':
-        return 'bg-yellow-500/10 text-yellow-400';
+        return 'bg-yellow-100 text-yellow-800';
       case 'hard':
-        return 'bg-red-500/10 text-red-400';
+        return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-500/10 text-gray-400';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   return (
     <div
-      className={`relative bg-gray-800/50 rounded-xl p-6 border border-gray-700/50 hover:border-electric-blue/50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-electric-blue/10 cursor-pointer group ${className}`}
+      className={`bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200/80 cursor-pointer group ${className}`}
       onClick={handleClick}
     >
-      {problem.similarity_score && (
-        <div className="absolute top-4 right-4">
-          <span className="bg-electric-blue/20 text-electric-blue text-xs font-medium px-2.5 py-1 rounded-full">
-            {Math.round(problem.similarity_score * 100)}% Match
-          </span>
-        </div>
-      )}
-
-      <h3 className="text-lg font-semibold text-white group-hover:text-electric-blue transition-colors duration-150 mb-2 pr-16">
+      <h3 className="text-lg font-bold text-gray-900 group-hover:text-sih-orange transition-colors duration-150 mb-2">
         {problem.title}
       </h3>
 
-      <p className="text-gray-400 text-sm mb-4 line-clamp-3">
+      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
         {problem.description}
       </p>
 
@@ -78,7 +70,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({
         <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getDifficultyColor(problem.difficulty_level)}`}>
           {problem.difficulty_level}
         </div>
-        <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-700 text-gray-300">
+        <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
           <TagIcon className="w-3 h-3 mr-1.5" />
           {problem.category}
         </div>

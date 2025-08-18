@@ -7,6 +7,10 @@ export default {
   theme: {
     extend: {
       colors: {
+        'sih-orange': '#F97316',
+        'sih-green': '#16A34A',
+        'sih-blue': '#2563EB',
+        'light-bg': '#F9FAFB',
         'dark-charcoal': '#1A202C',
         'electric-blue': '#2563EB',
       },
