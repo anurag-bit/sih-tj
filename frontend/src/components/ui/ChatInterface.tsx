@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PaperAirplaneIcon, SparklesIcon, UserIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import ErrorMessage from './ErrorMessage';
 import LoadingSpinner from './LoadingSpinner';

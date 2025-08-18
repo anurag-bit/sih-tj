@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import ErrorMessage from './components/ui/ErrorMessage';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import SkeletonCard from './components/ui/SkeletonCard';
-import { useRetry, useApiWithRetry } from './hooks/useRetry';
+import { useRetry } from './hooks/useRetry';
 
 // Component that throws an error for testing ErrorBoundary
-const ErrorThrowingComponent: React.FC<{ shouldThrow: boolean }> = ({ shouldThrow }) => {
+interface ErrorThrowingComponentProps {
+  shouldThrow: boolean;
+}
+
+const ErrorThrowingComponent: React.FC<ErrorThrowingComponentProps> = ({ shouldThrow }) => {
   if (shouldThrow) {
     throw new Error('Test error for ErrorBoundary');
   }
@@ -72,7 +76,6 @@ const RetryTestComponent: React.FC = () => {
 // Main test component
 const TestComponents: React.FC = () => {
   const [showError, setShowError] = useState(false);
-  const [showLoading, setShowLoading] = useState(false);
 
   return (
     <div className="min-h-screen bg-dark-charcoal p-8 space-y-8">

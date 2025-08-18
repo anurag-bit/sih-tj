@@ -1,4 +1,3 @@
-import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import ChartSkeleton from './ChartSkeleton';
 
@@ -17,14 +16,14 @@ interface OrganizationChartProps {
 const COLORS = ['#16A34A', '#22C55E', '#4ADE80', '#86EFAC', '#BBF7D0']; // Green shades
 
 const OrganizationChart: React.FC<OrganizationChartProps> = ({ data, loading = false }) => {
-  const totalProblems = Object.values(data).reduce((sum, count) => sum + count, 0);
+  const totalProblems = Object.values(data).reduce((sum, count) => Number(sum) + Number(count), 0);
   
   const chartData: OrganizationData[] = Object.entries(data)
     .map(([name, value]) => ({
       name: name.length > 20 ? `${name.substring(0, 20)}...` : name,
       fullName: name,
-      value,
-      percentage: Math.round((value / totalProblems) * 100)
+      value: Number(value),
+      percentage: Math.round((Number(value) / totalProblems) * 100)
     }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 5);
@@ -76,7 +75,7 @@ const OrganizationChart: React.FC<OrganizationChartProps> = ({ data, loading = f
             dataKey="value"
             cornerRadius={8}
           >
-            {chartData.map((entry, index) => (
+            {chartData.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>

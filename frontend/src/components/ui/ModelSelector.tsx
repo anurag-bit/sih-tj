@@ -1,4 +1,4 @@
-import React from 'react';
+// (No import needed for React here)
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
@@ -84,14 +84,14 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
               {models.map((model) => (
                 <Listbox.Option
                   key={model.id}
-                  className={({ active }) =>
+                  className={({ active }: { active: boolean }) =>
                     `relative cursor-default select-none py-2 pl-10 pr-4 ${
                       active ? 'bg-sih-blue/10 text-sih-blue' : 'text-gray-900'
                     }`
                   }
                   value={model}
                 >
-                  {({ selected }) => (
+                  {({ selected }: { selected: boolean }) => (
                     <>
                       <div className="flex flex-col">
                         <div className="flex items-center justify-between">

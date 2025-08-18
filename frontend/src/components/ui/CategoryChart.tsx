@@ -1,4 +1,3 @@
-import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import ChartSkeleton from './ChartSkeleton';
 
@@ -19,7 +18,7 @@ const CategoryChart: React.FC<CategoryChartProps> = ({ data, loading = false }) 
   const chartData: CategoryData[] = Object.entries(data)
     .map(([category, count]) => ({
       category: category.length > 15 ? `${category.substring(0, 15)}...` : category,
-      count,
+      count: Number(count),
       fullCategory: category,
     }))
     .sort((a, b) => b.count - a.count)
@@ -55,9 +54,8 @@ const CategoryChart: React.FC<CategoryChartProps> = ({ data, loading = false }) 
             width={120}
             tick={{
               width: 110,
-              whiteSpace: 'nowrap',
+              style: { whiteSpace: 'nowrap' },
               overflow: 'hidden',
-              textOverflow: 'ellipsis',
             }}
           />
           <Tooltip
@@ -71,7 +69,7 @@ const CategoryChart: React.FC<CategoryChartProps> = ({ data, loading = false }) 
             labelStyle={{ fontWeight: 'bold' }}
           />
           <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-            {chartData.map((entry, index) => (
+            {chartData.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Bar>

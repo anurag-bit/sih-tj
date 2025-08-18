@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Button from './Button';
 import LoadingSpinner from './LoadingSpinner';
@@ -52,7 +52,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             disabled={!query.trim() || loading}
             className="px-3 sm:px-6 py-2 sm:py-2 flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
           >
-            {loading && <LoadingSpinner size="sm" color="white" />}
+            {loading && <LoadingSpinner size="sm" color="gray" />}
             <span className="hidden sm:inline">{loading ? 'Searching...' : 'Search'}</span>
             <span className="sm:hidden">{loading ? '...' : 'Go'}</span>
           </Button>
