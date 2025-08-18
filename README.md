@@ -15,7 +15,7 @@ An AI-powered guidance platform designed to help engineering students discover a
 2.  **Set up environment variables:**
     ```bash
     cp .env.template .env
-    # Edit .env file with your API keys (at least GEMINI_API_KEY)
+    # Edit .env file with your API keys (at least OPENROUTER_API_KEY)
     ```
 
 3.  **Start the application:**
@@ -47,18 +47,18 @@ Update your `.env` file with the required variables for your target platform:
 - **GCP:**
   ```
   GCP_PROJECT_ID="your-gcp-project-id"
-  GEMINI_API_KEY="your-gemini-key"
+  OPENROUTER_API_KEY="your-openRouter-key"
   ```
 - **AWS:**
   ```
   AWS_REGION="us-east-1"
-  GEMINI_API_KEY="your-gemini-key"
+  OPENROUTER_API_KEY="your-openRouter-key"
   ```
 - **Azure:**
   ```
   AZURE_LOCATION="East US"
   AZURE_RESOURCE_GROUP="sih-solvers-compass-rg"
-  GEMINI_API_KEY="your-gemini-key"
+  OPENROUTER_API_KEY="your-openRouter-key"
   ```
 
 ### 3. Deploy
