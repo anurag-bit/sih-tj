@@ -7,7 +7,7 @@ from typing import AsyncGenerator, List, Dict
 
 from loguru import logger
 from app.config import settings
-from app.models import ChatRequest, ChatResponse, ProblemStatement
+from app.models import ChatRequest, ChatResponse, ProblemStatement, ChatModel, ChatModelsResponse
 
 class ChatService:
     """Service for handling chat interactions with OpenRouter."""
@@ -25,9 +25,53 @@ class ChatService:
         }
         # Define a default set of models to use as a fallback
         self.default_models = [
-            "openai/gpt-3.5-turbo",
+            "openai/gpt-oss-20b:free",
             "google/gemini-flash-1.5",
+            "moonshotai/kimi-k2:free",
+            "google/gemma-3n-e2b-it:free"
         ]
+        
+        # Define model metadata for the UI
+        self.available_models = [
+            {
+                "id": "openai/gpt-oss-20b:free",
+                "name": "GPT OSS 20B",
+                "description": "Fast and efficient general-purpose model",
+                "provider": "OpenAI"
+            },
+            {
+                "id": "google/gemini-flash-1.5",
+                "name": "Gemini Flash 1.5",
+                "description": "Google's fast and capable model",
+                "provider": "Google"
+            },
+            {
+                "id": "moonshotai/kimi-k2:free",
+                "name": "Kimi K2",
+                "description": "Moonshot AI's conversational model",
+                "provider": "Moonshot AI"
+            },
+            {
+                "id": "google/gemma-3n-e2b-it:free",
+                "name": "Gemma 3 2B IT",
+                "description": "Google's lightweight instruction-tuned model",
+                "provider": "Google"
+            },
+            {
+                "id": "openai/gpt-4o-mini",
+                "name": "GPT-4o Mini",
+                "description": "OpenAI's most capable small model",
+                "provider": "OpenAI"
+            },
+            {
+                "id": "anthropic/claude-3.5-sonnet",
+                "name": "Claude 3.5 Sonnet",
+                "description": "Anthropic's latest and most capable model",
+                "provider": "Anthropic"
+            }
+        ]
+        
+        self.default_model_id = self.default_models[0]
 
     def _validate_context(self, problem_context: str) -> bool:
         """
@@ -182,6 +226,19 @@ Please answer the following question about this specific problem statement:"""
             "Are there any specific constraints or requirements mentioned?",
             "What kind of impact would solving this problem have?"
         ]
+
+    def get_available_models(self) -> ChatModelsResponse:
+        """
+        Get the list of available chat models.
+        
+        Returns:
+            ChatModelsResponse: List of available models with metadata
+        """
+        models = [ChatModel(**model_info) for model_info in self.available_models]
+        return ChatModelsResponse(
+            models=models,
+            default_model=self.default_model_id
+        )
 
 class ChatServiceError(Exception):
     """Custom exception for chat service errors."""

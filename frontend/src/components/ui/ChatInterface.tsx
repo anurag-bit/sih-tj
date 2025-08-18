@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PaperAirplaneIcon, SparklesIcon, UserIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import ErrorMessage from './ErrorMessage';
 import LoadingSpinner from './LoadingSpinner';
+import ModelSelector from './ModelSelector';
 
 interface Message {
   id: string;
@@ -9,6 +10,13 @@ interface Message {
   content: string;
   timestamp: Date;
   isStreaming?: boolean;
+}
+
+interface ChatModel {
+  id: string;
+  name: string;
+  description: string;
+  provider: string;
 }
 
 interface ChatInterfaceProps {
@@ -22,11 +30,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+  const [availableModels, setAvailableModels] = useState<ChatModel[]>([]);
+  const [selectedModel, setSelectedModel] = useState<ChatModel | null>(null);
+  const [modelsLoading, setModelsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     fetchSuggestedQuestions();
+    fetchAvailableModels();
   }, []);
 
   useEffect(() => {
@@ -46,6 +58,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
       }
     } catch (err) {
       console.error('Failed to fetch suggested questions:', err);
+    }
+  };
+
+  const fetchAvailableModels = async () => {
+    try {
+      setModelsLoading(true);
+      const response = await fetch('/api/chat/models');
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableModels(data.models || []);
+        // Set default model if available
+        if (data.models?.length > 0) {
+          const defaultModel = data.models.find((m: ChatModel) => m.id === data.default_model) || data.models[0];
+          setSelectedModel(defaultModel);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch available models:', err);
+    } finally {
+      setModelsLoading(false);
     }
   };
 
@@ -84,7 +116,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
         body: JSON.stringify({
           problem_id: problemId,
           problem_context: problemContext,
-          user_question: question.trim()
+          user_question: question.trim(),
+          model: selectedModel?.id || null
         }),
       });
 
@@ -232,6 +265,19 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
 
       {/* Input Area */}
       <div className="border-t border-gray-200 p-4 bg-white/80 backdrop-blur-sm">
+        {/* Model Selection */}
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            AI Model
+          </label>
+          <ModelSelector
+            models={availableModels}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
+            loading={modelsLoading}
+          />
+        </div>
+        
         <form onSubmit={handleSubmit} className="flex items-center gap-3">
           <textarea
             ref={textareaRef}
@@ -248,7 +294,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
             disabled={!inputValue.trim() || isLoading}
             className="w-10 h-10 flex-shrink-0 bg-sih-orange hover:bg-opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-full flex items-center justify-center transition-colors"
           >
-            {isLoading ? <LoadingSpinner size="sm" color="white" /> : <PaperAirplaneIcon className="w-5 h-5" />}
+            {isLoading ? <LoadingSpinner size="sm" color="gray" /> : <PaperAirplaneIcon className="w-5 h-5" />}
           </button>
         </form>
       </div>

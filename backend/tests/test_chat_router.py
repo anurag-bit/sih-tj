@@ -51,7 +51,8 @@ class TestChatRouter:
         # Verify the service was called with correct parameters
         mock_chat_service.generate_response.assert_called_once_with(
             problem_context=valid_chat_request["problem_context"],
-            user_question=valid_chat_request["user_question"]
+            user_question=valid_chat_request["user_question"],
+            model=None
         )
     
     def test_chat_endpoint_invalid_context(self, mock_chat_service, valid_chat_request):

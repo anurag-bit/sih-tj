@@ -35,12 +35,27 @@ class ChatRequest(BaseModel):
     problem_id: str = Field(..., description="Problem statement ID for context")
     problem_context: str = Field(..., description="Full problem statement context")
     user_question: str = Field(..., min_length=1, description="User's question about the problem")
+    model: Optional[str] = Field(default=None, description="Selected AI model to use for response")
 
 
 class ChatResponse(BaseModel):
     """Chat response model."""
     response: str = Field(..., description="AI assistant response")
     timestamp: datetime = Field(default_factory=datetime.now, description="Response timestamp")
+
+
+class ChatModel(BaseModel):
+    """Available chat model."""
+    id: str = Field(..., description="Model identifier")
+    name: str = Field(..., description="Human-readable model name")
+    description: str = Field(..., description="Model description")
+    provider: str = Field(..., description="Model provider (OpenAI, Google, etc.)")
+
+
+class ChatModelsResponse(BaseModel):
+    """Response containing available chat models."""
+    models: List[ChatModel] = Field(..., description="List of available models")
+    default_model: str = Field(..., description="Default model ID")
 
 
 class Repository(BaseModel):

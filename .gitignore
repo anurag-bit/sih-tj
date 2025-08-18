@@ -41,7 +41,9 @@ backend/app/services/__pycache__/github_service.cpython-310.pyc
 backend/app/services/__pycache__/search_service.cpython-310.pyc
 __pycache__
 dist
+/node_modules/
 node_modules/
+node_modules/*
 node_modules/.vite
 
 # Python virtual environments

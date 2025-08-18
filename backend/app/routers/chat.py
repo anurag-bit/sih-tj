@@ -5,7 +5,7 @@ import json
 import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from ..models import ChatRequest, ChatResponse
+from ..models import ChatRequest, ChatResponse, ChatModelsResponse
 from ..services.chat_service import get_chat_service
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,8 @@ async def chat_with_problem(chat_request: ChatRequest) -> ChatResponse:
         chat_service = get_chat_service()
         response_text = await chat_service.generate_response(
             problem_context=chat_request.problem_context,
-            user_question=chat_request.user_question
+            user_question=chat_request.user_question,
+            model=chat_request.model
         )
         
         return ChatResponse(response=response_text)
@@ -78,7 +79,8 @@ async def chat_stream(chat_request: ChatRequest) -> StreamingResponse:
             try:
                 async for chunk in chat_service.generate_streaming_response(
                     problem_context=chat_request.problem_context,
-                    user_question=chat_request.user_question
+                    user_question=chat_request.user_question,
+                    model=chat_request.model
                 ):
                     # Format as Server-Sent Events
                     yield f"data: {json.dumps({'chunk': chunk})}\n\n"
@@ -122,6 +124,25 @@ async def get_suggested_questions():
     return {
         "suggestions": chat_service.get_suggested_questions()
     }
+
+
+@router.get("/models", response_model=ChatModelsResponse)
+async def get_available_models():
+    """
+    Get available chat models for user selection.
+    
+    Returns:
+        ChatModelsResponse: List of available models with metadata
+    """
+    try:
+        chat_service = get_chat_service()
+        return chat_service.get_available_models()
+    except Exception as e:
+        logger.error(f"Failed to get available models: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to retrieve available models"
+        )
 
 
 @router.get("/health")
