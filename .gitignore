@@ -51,6 +51,7 @@ venv/
 env/
 test_env/
 *_env/
+frontend/node_modules/
 frontend/node_modules/.vite/deps/_metadata.json
 frontend/node_modules/.vite/deps/_metadata.json
 frontend/node_modules/.vite/deps/@heroicons_react_24_outline.js
