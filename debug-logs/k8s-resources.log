@@ -1,0 +1,25 @@
+=== ALL PODS ===
+NAME                       READY   STATUS    RESTARTS        AGE     IP           NODE                         NOMINATED NODE   READINESS GATES
+backend-b84cfcfdd-dr9b4    1/1     Running   2 (2m56s ago)   8m8s    10.0.2.117   ip-10-0-2-234.ec2.internal   <none>           <none>
+backend-b84cfcfdd-vz48w    1/1     Running   1 (2m50s ago)   7m35s   10.0.2.142   ip-10-0-2-234.ec2.internal   <none>           <none>
+chromadb-fbc577888-zgrmr   0/1     Pending   0               10m     <none>       <none>                       <none>           <none>
+frontend-66b578b86-n2cf8   1/1     Running   0               19m     10.0.1.192   ip-10-0-1-52.ec2.internal    <none>           <none>
+frontend-66b578b86-wfl66   1/1     Running   0               19m     10.0.2.118   ip-10-0-2-234.ec2.internal   <none>           <none>
+
+=== ALL SERVICES ===
+NAME       TYPE           CLUSTER-IP      EXTERNAL-IP                                                               PORT(S)        AGE   SELECTOR
+backend    ClusterIP      172.20.123.92   <none>                                                                    8000/TCP       19m   app=backend
+chromadb   ClusterIP      172.20.9.135    <none>                                                                    8000/TCP       19m   app=chromadb
+frontend   LoadBalancer   172.20.86.217   acf8be5fbf9a048cda54695f88bd8810-1872743573.us-east-1.elb.amazonaws.com   80:31997/TCP   19m   app=frontend
+
+=== ALL DEPLOYMENTS ===
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                      SELECTOR
+backend    2/2     2            2           19m   backend      ghcr.io/anurag-bit/sih-tj-backend:latest    app=backend
+chromadb   0/1     1            0           19m   chromadb     ghcr.io/chroma-core/chroma:0.4.15           app=chromadb
+frontend   2/2     2            2           19m   frontend     ghcr.io/anurag-bit/sih-tj-frontend:latest   app=frontend
+
+=== ALL PVCS ===
+NAME           STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE   VOLUMEMODE
+chromadb-pvc   Pending                                      gp2            <unset>                 14m   Filesystem
+
+=== ALL STORAGE CLASSES ===

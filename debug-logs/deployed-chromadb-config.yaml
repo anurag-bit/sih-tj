@@ -1,0 +1,121 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast-ssd
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3  # Faster than gp2
+  iops: "3000"  # Higher IOPS for better performance
+  throughput: "125"  # MB/s
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chromadb-pvc
+  namespace: sih-solvers-compass
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi  # Ample storage space
+  storageClassName: gp2  # Use default EKS storage
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chromadb
+  namespace: sih-solvers-compass
+  labels:
+    app: chromadb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chromadb
+  template:
+    metadata:
+      labels:
+        app: chromadb
+    spec:
+      containers:
+      - name: chromadb
+        image: ghcr.io/chroma-core/chroma:0.4.15
+        ports:
+        - containerPort: 8000
+        env:
+        - name: IS_PERSISTENT
+          value: "TRUE"
+        - name: PERSIST_DIRECTORY
+          value: "/chroma/chroma"
+        - name: ANONYMIZED_TELEMETRY
+          value: "FALSE"
+        - name: CHROMA_SERVER_HOST
+          value: "0.0.0.0"
+        - name: CHROMA_SERVER_HTTP_PORT
+          value: "8000"
+        resources:
+          requests:
+            memory: "1Gi"  # Ample memory
+            cpu: "500m"    # Sufficient CPU
+          limits:
+            memory: "2Gi"  # Higher limit
+            cpu: "1"       # More processing power
+        volumeMounts:
+        - name: chromadb-storage
+          mountPath: /chroma/chroma
+        livenessProbe:
+          httpGet:
+            path: /api/v1/heartbeat
+            port: 8000
+          initialDelaySeconds: 120  # Longer startup time
+          periodSeconds: 30
+          failureThreshold: 3
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/v1/heartbeat
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          failureThreshold: 5
+          timeoutSeconds: 10
+        # Ensure proper shutdown
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+      volumes:
+      - name: chromadb-storage
+        persistentVolumeClaim:
+          claimName: chromadb-pvc
+      # Node affinity for better performance
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - chromadb
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chromadb  # Fixed service name matching backend expectation
+  namespace: sih-solvers-compass
+  labels:
+    app: chromadb
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: chromadb

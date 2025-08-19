@@ -16,6 +16,7 @@ resource "aws_subnet" "public_a" {
 
   tags = {
     Name = "sih-public-a"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
   }
 }
 
@@ -27,6 +28,7 @@ resource "aws_subnet" "public_b" {
 
   tags = {
     Name = "sih-public-b"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
   }
 }
 
@@ -114,7 +116,7 @@ resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
   role       = aws_iam_role.eks_nodes.name
 }
 
-resource "aws_iam_role_policy_attachment" "ec2_container_registry_read_only" {
+resource "aws_iam_role_policy_attachment" "ecr_read_only_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.eks_nodes.name
 }
@@ -149,14 +151,20 @@ resource "aws_eks_node_group" "main" {
   depends_on = [
     aws_iam_role_policy_attachment.eks_worker_node_policy,
     aws_iam_role_policy_attachment.eks_cni_policy,
-    aws_iam_role_policy_attachment.ec2_container_registry_read_only,
+    aws_iam_role_policy_attachment.ecr_read_only_policy,
   ]
 }
 
-resource "aws_ecr_repository" "backend" {
-  name = "sih-backend"
-}
+# Enable AWS EBS CSI Driver as an EKS managed add-on
+resource "aws_eks_addon" "ebs_csi" {
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "aws-ebs-csi-driver"
 
-resource "aws_ecr_repository" "frontend" {
-  name = "sih-frontend"
+  # Let AWS choose a compatible version; resolve conflicts automatically
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  depends_on = [
+    aws_eks_cluster.main,
+  ]
 }

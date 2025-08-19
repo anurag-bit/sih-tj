@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: sih-solvers-compass
+  labels:
+    app: backend
+spec:
+  replicas: 1  # Reduced to 1 for t3.medium
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: ghcr.io/anurag-bit/sih-tj-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sih-secrets
+              key: gemini-api-key
+        - name: OPENROUTER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sih-secrets
+              key: openrouter-api-key
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: sih-secrets
+              key: github-token
+              optional: true
+        - name: CHROMA_HOST
+          value: "chromadb-service"
+        - name: CHROMA_PORT
+          value: "8000"
+        - name: ENVIRONMENT
+          value: "production"
+        - name: DEBUG
+          value: "false"
+        resources:
+          requests:
+            memory: "1Gi"  # Reduced from 2Gi
+            cpu: "500m"    # Reduced from 1000m
+          limits:
+            memory: "1.5Gi"  # Reduced from 4Gi
+            cpu: "1"         # Reduced from 2
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: sih-solvers-compass
+  labels:
+    app: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: backend

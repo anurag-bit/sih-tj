@@ -1,0 +1,29 @@
+=== EBS CSI DRIVER STATUS ===
+ebs-csi-controller-64f7f8698-62tzd   6/6     Running   0          14m
+ebs-csi-controller-64f7f8698-g8k7c   6/6     Running   0          14m
+ebs-csi-node-62fqg                   3/3     Running   0          14m
+ebs-csi-node-rxw6r                   3/3     Running   0          14m
+
+=== CSI DRIVER DETAILS ===
+Name:         ebs.csi.aws.com
+Namespace:    
+Labels:       app.kubernetes.io/name=aws-ebs-csi-driver
+Annotations:  <none>
+API Version:  storage.k8s.io/v1
+Kind:         CSIDriver
+Metadata:
+  Creation Timestamp:  2025-08-19T10:38:52Z
+  Resource Version:    3096
+  UID:                 3806f505-f8e4-43c2-964f-6cc3cf9fe49b
+Spec:
+  Attach Required:     true
+  Fs Group Policy:     File
+  Pod Info On Mount:   false
+  Requires Republish:  false
+  Se Linux Mount:      false
+  Storage Capacity:    false
+  Volume Lifecycle Modes:
+    Persistent
+Events:  <none>
+
+=== STORAGE CLASSES DETAIL ===

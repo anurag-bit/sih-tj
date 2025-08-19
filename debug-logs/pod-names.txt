@@ -1,0 +1,5 @@
+backend-b84cfcfdd-dr9b4
+backend-b84cfcfdd-vz48w
+chromadb-fbc577888-zgrmr
+frontend-66b578b86-n2cf8
+frontend-66b578b86-wfl66

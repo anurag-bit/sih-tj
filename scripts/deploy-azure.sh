@@ -27,13 +27,44 @@ fi
 echo "Logging in to Azure..."
 az login --use-device-code
 
-# Terraform deployment
+# Terraform deployment with proper plan/apply workflow
 echo "Initializing Terraform for Azure..."
 cd infrastructure/terraform-azure
 
+# Initialize Terraform
+echo "🔧 Initializing Terraform..."
 terraform init
-echo "Applying Terraform configuration to create AKS cluster and ACR..."
-terraform apply -auto-approve \
+
+# Generate and save execution plan
+echo "📋 Creating Terraform execution plan..."
+terraform plan -out=tfplan
+
+# Show plan summary
+echo ""
+echo "📊 Terraform Plan Summary:"
+echo "=================================="
+terraform show -no-color tfplan | head -20
+echo "=================================="
+echo ""
+
+# Confirmation prompt
+read -p "Do you want to apply this Terraform plan? (y/n): " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "❌ Deployment cancelled by user."
+    rm -f tfplan
+    exit 1
+fi
+
+# Apply the saved plan
+echo "🚀 Applying Terraform configuration..."
+terraform apply tfplan
+
+# Clean up plan file
+rm -f tfplan
+
+# Get outputs
+echo "📤 Retrieving Terraform outputs..." \
   -var="resource_group_name=${AZURE_RESOURCE_GROUP}" \
   -var="location=${AZURE_LOCATION}"
 

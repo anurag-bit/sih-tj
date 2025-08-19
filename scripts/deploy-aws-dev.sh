@@ -2,6 +2,13 @@
 
 # SIH Solver's Compass - One-Click AWS DEV Deployment Script
 # This script deploys a lightweight, free-tier friendly version of the application to AWS for development and testing.
+#
+# Usage: ./deploy-aws-dev.sh [options]
+# Options:
+#   --plan-only     : Only create and show the Terraform plan
+#   --auto-approve  : Skip confirmation prompts
+#   --skip-build    : Skip Docker image building
+#   --help          : Show this help message
 
 set -e
 
@@ -10,13 +17,65 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
+
+# Default options
+PLAN_ONLY=false
+AUTO_APPROVE=false
+SKIP_BUILD=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --plan-only)
+            PLAN_ONLY=true
+            shift
+            ;;
+        --auto-approve)
+            AUTO_APPROVE=true
+            shift
+            ;;
+        --skip-build)
+            SKIP_BUILD=true
+            shift
+            ;;
+        --help)
+            echo -e "${BLUE}SIH Solver's Compass - AWS DEV Deployment Script${NC}"
+            echo "Usage: $0 [options]"
+            echo ""
+            echo -e "${YELLOW}Options:${NC}"
+            echo "  --plan-only     Only create and show the Terraform plan"
+            echo "  --auto-approve  Skip confirmation prompts"
+            echo "  --skip-build    Skip Docker image building"
+            echo "  --help          Show this help message"
+            echo ""
+            echo -e "${YELLOW}Examples:${NC}"
+            echo "  $0                    # Interactive DEV deployment"
+            echo "  $0 --plan-only       # Show DEV plan without applying"
+            echo "  $0 --auto-approve    # Deploy DEV without prompts"
+            echo "  $0 --skip-build      # Skip Docker builds"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}❌ Unknown option $1${NC}"
+            exit 1
+            ;;
+    esac
+done
 
 # Configuration
 TERRAFORM_DIR="../infrastructure/terraform-aws"
 K8S_DIR="../infrastructure/k8s"
 
-echo -e "${BLUE}🚀 SIH Solver's Compass - One-Click AWS DEV Deployment${NC}"
+echo -e "${PURPLE}🚀 SIH Solver's Compass - AWS DEV Deployment${NC}"
+if [ "$PLAN_ONLY" = true ]; then
+    echo -e "${BLUE}📋 Mode: Plan Only${NC}"
+elif [ "$AUTO_APPROVE" = true ]; then
+    echo -e "${YELLOW}⚡ Mode: Auto-Approve${NC}"
+else
+    echo -e "${GREEN}🔍 Mode: Interactive${NC}"
+fi
 echo "========================================================"
 
 # Check prerequisites
@@ -60,28 +119,67 @@ if [ -z "$GEMINI_API_KEY" ]; then
     export GEMINI_API_KEY
 fi
 
-# Initialize and apply Terraform
+# Initialize and apply Terraform with best practices
 echo -e "${YELLOW}🏗️  Deploying DEV AWS infrastructure with Terraform...${NC}"
 cd $TERRAFORM_DIR
 
+# Initialize Terraform
+echo -e "${BLUE}🔧 Initializing Terraform...${NC}"
 terraform init
 
-echo "Running Terraform plan..."
+# Create Terraform plan with DEV-specific variables
+echo -e "${BLUE}📋 Creating Terraform execution plan for DEV environment...${NC}"
 terraform plan \
     -var="OPENROUTER_API_KEY=$OPENROUTER_API_KEY" \
-    -var='instance_types=["t3.micro"]' \
-    -var=desired_size=1 \
-    -var=max_size=1 \
-    -var=min_size=1
-
-echo "Running Terraform apply..."
-terraform apply \
-    -var="OPENROUTER_API_KEY=$OPENROUTER_API_KEY" \
+    -var="GEMINI_API_KEY=${GEMINI_API_KEY:-}" \
     -var='instance_types=["t3.micro"]' \
     -var=desired_size=1 \
     -var=max_size=1 \
     -var=min_size=1 \
-    -auto-approve
+    -out=tfplan-dev
+
+# Show plan summary
+echo ""
+echo -e "${BLUE}📊 Terraform Plan Summary for DEV:${NC}"
+echo "=================================="
+echo "Instance Types: t3.micro (Free Tier)"
+echo "Node Count: 1 (min: 1, max: 1)"
+echo "Environment: Development"
+echo "=================================="
+terraform show -no-color tfplan-dev | head -20
+echo "..."
+echo "=================================="
+echo ""
+
+if [ "$PLAN_ONLY" = true ]; then
+    echo -e "${GREEN}✅ DEV Plan created successfully. Exiting (plan-only mode).${NC}"
+    rm -f tfplan-dev
+    exit 0
+fi
+
+# Confirmation prompt
+if [ "$AUTO_APPROVE" = false ]; then
+    echo -e "${YELLOW}⚠️  This will create AWS resources that may incur charges.${NC}"
+    echo -e "${BLUE}📝 DEV Configuration:${NC}"
+    echo "  - 1x t3.micro EKS worker node (Free Tier eligible)"
+    echo "  - ECR repositories for Docker images"
+    echo "  - Application Load Balancer"
+    echo ""
+    read -p "Do you want to apply this DEV Terraform plan? (y/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}❌ Deployment cancelled by user.${NC}"
+        rm -f tfplan-dev
+        exit 1
+    fi
+fi
+
+# Apply the saved plan
+echo -e "${GREEN}🚀 Applying Terraform configuration for DEV...${NC}"
+terraform apply tfplan-dev
+
+# Clean up plan file
+rm -f tfplan-dev
 
 # Get Terraform outputs
 echo -e "${YELLOW}📤 Getting Terraform outputs...${NC}"
@@ -97,14 +195,25 @@ echo -e "${YELLOW}⚙️  Configuring kubectl...${NC}"
 aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
 
 # Docker build and push
-echo -e "${YELLOW}🐳 Building and pushing Docker images to ECR...${NC}"
-aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_BACKEND_URL
+if [ "$SKIP_BUILD" = false ]; then
+    echo -e "${YELLOW}🐳 Building and pushing Docker images to ECR...${NC}"
+    aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_BACKEND_URL
 
-docker build -t $ECR_BACKEND_URL:latest ./backend
-docker push $ECR_BACKEND_URL:latest
+    echo -e "${BLUE}📦 Building backend image...${NC}"
+    docker build -t $ECR_BACKEND_URL:latest ./backend
+    echo -e "${BLUE}📤 Pushing backend image...${NC}"
+    docker push $ECR_BACKEND_URL:latest
 
-docker build -t $ECR_FRONTEND_URL:latest ./frontend
-docker push $ECR_FRONTEND_URL:latest
+    echo -e "${BLUE}📦 Building frontend image...${NC}"
+    docker build -t $ECR_FRONTEND_URL:latest ./frontend
+    echo -e "${BLUE}📤 Pushing frontend image...${NC}"
+    docker push $ECR_FRONTEND_URL:latest
+    
+    echo -e "${GREEN}✅ Docker images built and pushed successfully${NC}"
+else
+    echo -e "${YELLOW}⏭️  Skipping Docker image building (--skip-build)${NC}"
+    echo -e "${BLUE}ℹ️  Using existing images: $ECR_BACKEND_URL:latest and $ECR_FRONTEND_URL:latest${NC}"
+fi
 
 # Create namespace
 echo -e "${YELLOW}📦 Creating Kubernetes namespace...${NC}"
@@ -164,16 +273,29 @@ BACKEND_POD=$(kubectl get pods -n sih-solvers-compass -l app=backend -o jsonpath
 kubectl exec -n sih-solvers-compass $BACKEND_POD -- python scripts/ingest_data.py
 
 # Deployment complete
-echo -e "${GREEN}🎉 DEV Deployment completed successfully!${NC}"
-echo "=================================================="
-echo -e "${GREEN}✅ Application URL: http://$EXTERNAL_HOSTNAME${NC}"
-echo -e "${GREEN}✅ Backend API: http://$EXTERNAL_HOSTNAME/api/docs${NC}"
-echo -e "${GREEN}✅ EKS Cluster: $EKS_CLUSTER_NAME${NC}"
+echo ""
+echo -e "${GREEN}🎉 AWS DEV Deployment completed successfully!${NC}"
+echo "===================================================="
+echo -e "${PURPLE}📋 Deployment Summary:${NC}"
+echo -e "${GREEN}✅ Application URL:${NC}     http://$EXTERNAL_HOSTNAME"
+echo -e "${GREEN}✅ Backend API:${NC}         http://$EXTERNAL_HOSTNAME/api/docs"  
+echo -e "${GREEN}✅ EKS Cluster:${NC}         $EKS_CLUSTER_NAME"
+echo -e "${GREEN}✅ AWS Region:${NC}          $AWS_REGION"
+echo -e "${GREEN}✅ Backend Image:${NC}       $ECR_BACKEND_URL:latest"
+echo -e "${GREEN}✅ Frontend Image:${NC}      $ECR_FRONTEND_URL:latest"
+
+if [ "$SKIP_BUILD" = true ]; then
+    echo -e "${YELLOW}⚠️  Docker builds were skipped${NC}"
+fi
 
 echo ""
 echo -e "${BLUE}📋 Useful commands:${NC}"
-echo "  kubectl get pods -n sih-solvers-compass"
+echo "  kubectl get pods -n sih-solvers-compass              # Check pod status"
+echo "  kubectl logs -f deployment/backend -n sih-solvers-compass  # Backend logs"
+echo "  kubectl logs -f deployment/frontend -n sih-solvers-compass # Frontend logs"
+echo "  kubectl get svc -n sih-solvers-compass               # Check services"
 
 echo ""
-echo -e "${YELLOW}💡 To clean up resources, run:${NC}"
-echo "  ./scripts/destroy-aws.sh"
+echo -e "${YELLOW}💡 To clean up DEV resources, run:${NC}"
+echo "  cd infrastructure/terraform-aws && terraform destroy"
+echo "===================================================="

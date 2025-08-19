@@ -27,15 +27,44 @@ aws sts get-caller-identity
 echo "Logging in to AWS ECR..."
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$AWS_REGION.amazonaws.com
 
-# Terraform deployment
+# Terraform deployment with proper plan/apply workflow
 echo "Initializing Terraform for AWS..."
 cd infrastructure/terraform-aws
 
-# Get ECR repository URL from terraform output
-# This assumes the ECR repo is defined in the terraform config
+# Initialize Terraform
+echo "🔧 Initializing Terraform..."
 terraform init
-echo "Applying Terraform configuration to create EKS cluster and ECR..."
-terraform apply -auto-approve
+
+# Generate and save execution plan
+echo "📋 Creating Terraform execution plan..."
+terraform plan -out=tfplan
+
+# Show plan summary
+echo ""
+echo "📊 Terraform Plan Summary:"
+echo "=================================="
+terraform show -no-color tfplan | head -20
+echo "=================================="
+echo ""
+
+# Confirmation prompt
+read -p "Do you want to apply this Terraform plan? (y/n): " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "❌ Deployment cancelled by user."
+    rm -f tfplan
+    exit 1
+fi
+
+# Apply the saved plan
+echo "🚀 Applying Terraform configuration..."
+terraform apply tfplan
+
+# Clean up plan file
+rm -f tfplan
+
+# Get outputs
+echo "📤 Retrieving Terraform outputs..."
 
 ECR_REPO_URL=$(terraform output -raw ecr_repository_url)
 EKS_CLUSTER_NAME=$(terraform output -raw eks_cluster_name)

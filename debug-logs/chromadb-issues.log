@@ -1,0 +1,82 @@
+Name:             chromadb-fbc577888-zgrmr
+Namespace:        sih-solvers-compass
+Priority:         0
+Service Account:  default
+Node:             <none>
+Labels:           app=chromadb
+                  pod-template-hash=fbc577888
+Annotations:      <none>
+Status:           Pending
+IP:               
+IPs:              <none>
+Controlled By:    ReplicaSet/chromadb-fbc577888
+Containers:
+  chromadb:
+    Image:      ghcr.io/chroma-core/chroma:0.4.15
+    Port:       8000/TCP
+    Host Port:  0/TCP
+    Limits:
+      cpu:     1
+      memory:  2Gi
+    Requests:
+      cpu:      500m
+      memory:   1Gi
+    Liveness:   http-get http://:8000/api/v1/heartbeat delay=120s timeout=10s period=30s #success=1 #failure=3
+    Readiness:  http-get http://:8000/api/v1/heartbeat delay=60s timeout=10s period=15s #success=1 #failure=5
+    Environment:
+      IS_PERSISTENT:            TRUE
+      PERSIST_DIRECTORY:        /chroma/chroma
+      ANONYMIZED_TELEMETRY:     FALSE
+      CHROMA_SERVER_HOST:       0.0.0.0
+      CHROMA_SERVER_HTTP_PORT:  8000
+    Mounts:
+      /chroma/chroma from chromadb-storage (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-fcwlj (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  chromadb-storage:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  chromadb-pvc
+    ReadOnly:   false
+  kube-api-access-fcwlj:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age   From               Message
+  ----     ------            ----  ----               -------
+  Warning  FailedScheduling  11m   default-scheduler  0/2 nodes are available: 1 Insufficient cpu, 1 Insufficient memory, 1 node(s) didn't find available persistent volumes to bind. preemption: 0/2 nodes are available: 1 No preemption victims found for incoming pod, 1 Preemption is not helpful for scheduling.
+  Warning  FailedScheduling  81s   default-scheduler  running PreBind plugin "VolumeBinding": binding volumes: context deadline exceeded
+
+Name:          chromadb-pvc
+Namespace:     sih-solvers-compass
+StorageClass:  gp2
+Status:        Pending
+Volume:        
+Labels:        <none>
+Annotations:   volume.beta.kubernetes.io/storage-provisioner: ebs.csi.aws.com
+               volume.kubernetes.io/selected-node: ip-10-0-1-52.ec2.internal
+               volume.kubernetes.io/storage-provisioner: ebs.csi.aws.com
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      
+Access Modes:  
+VolumeMode:    Filesystem
+Used By:       chromadb-fbc577888-zgrmr
+Events:
+  Type     Reason                Age                   From                                                                                     Message
+  ----     ------                ----                  ----                                                                                     -------
+  Normal   WaitForPodScheduled   14m                   persistentvolume-controller                                                              waiting for pod chromadb-fbc577888-pkgkj to be scheduled
+  Warning  ProvisioningFailed    13m (x2 over 13m)     ebs.csi.aws.com_ebs-csi-controller-64f7f8698-g8k7c_d741ec7e-518a-4867-b3ee-e7304cfb0bea  failed to provision volume with StorageClass "gp2": error generating accessibility requirements: no topology key found on CSINode ip-10-0-1-52.ec2.internal
+  Warning  ProvisioningFailed    8m51s (x4 over 13m)   ebs.csi.aws.com_ebs-csi-controller-64f7f8698-g8k7c_d741ec7e-518a-4867-b3ee-e7304cfb0bea  failed to provision volume with StorageClass "gp2": rpc error: code = Internal desc = Could not create volume "pvc-d3046252-5037-43bf-8c35-c5f7c45b2f3b": could not create volume in EC2: operation error EC2: CreateVolume, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, canceled, context deadline exceeded
+  Normal   ExternalProvisioning  4m46s (x43 over 14m)  persistentvolume-controller                                                              Waiting for a volume to be created either by the external provisioner 'ebs.csi.aws.com' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+  Normal   Provisioning          4m35s (x10 over 13m)  ebs.csi.aws.com_ebs-csi-controller-64f7f8698-g8k7c_d741ec7e-518a-4867-b3ee-e7304cfb0bea  External provisioner is provisioning volume for claim "sih-solvers-compass/chromadb-pvc"
+  Warning  ProvisioningFailed    4m30s (x4 over 13m)   ebs.csi.aws.com_ebs-csi-controller-64f7f8698-g8k7c_d741ec7e-518a-4867-b3ee-e7304cfb0bea  failed to provision volume with StorageClass "gp2": rpc error: code = Internal desc = Could not create volume "pvc-d3046252-5037-43bf-8c35-c5f7c45b2f3b": could not create volume in EC2: operation error EC2: CreateVolume, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, request canceled, context deadline exceeded
+

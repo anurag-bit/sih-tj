@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: sih-solvers-compass
+  labels:
+    app: frontend
+spec:
+  replicas: 1  # Reduced to 1 for t3.medium
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/anurag-bit/sih-tj-frontend:latest
+        ports:
+        - containerPort: 8080  # Use non-privileged port
+        env:
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "125m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+        command: ["/bin/sh"]  # Override to configure nginx for port 8080
+        args: ["-c", "sed -i 's/listen 80/listen 8080/g' /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: sih-solvers-compass
+  labels:
+    app: frontend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: frontend

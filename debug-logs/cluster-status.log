@@ -1,0 +1,13 @@
+=== CLUSTER STATUS ===
+Kubernetes control plane is running at https://974FEB6CE5BA013E8F048BE7E7307963.gr7.us-east-1.eks.amazonaws.com
+CoreDNS is running at https://974FEB6CE5BA013E8F048BE7E7307963.gr7.us-east-1.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+NAME                         STATUS   ROLES    AGE   VERSION               INTERNAL-IP   EXTERNAL-IP      OS-IMAGE                       KERNEL-VERSION                   CONTAINER-RUNTIME
+ip-10-0-1-52.ec2.internal    Ready    <none>   20m   v1.33.3-eks-3abbec1   10.0.1.52     54.162.113.200   Amazon Linux 2023.8.20250808   6.12.40-63.114.amzn2023.x86_64   containerd://1.7.27
+ip-10-0-2-234.ec2.internal   Ready    <none>   20m   v1.33.3-eks-3abbec1   10.0.2.234    13.220.25.102    Amazon Linux 2023.8.20250808   6.12.40-63.114.amzn2023.x86_64   containerd://1.7.27
+
+Client Version: v1.33.4
+Kustomize Version: v5.6.0
+Server Version: v1.33.3-eks-ace6451

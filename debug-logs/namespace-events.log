@@ -1,0 +1,81 @@
+LAST SEEN   TYPE      REASON                 OBJECT                               MESSAGE
+21m         Normal    WaitForFirstConsumer   persistentvolumeclaim/chromadb-pvc   waiting for first consumer to be created before binding
+21m         Normal    ScalingReplicaSet      deployment/chromadb                  Scaled up replica set chromadb-fbc577888 from 0 to 1
+21m         Normal    SuccessfulCreate       replicaset/chromadb-fbc577888        Created pod: chromadb-fbc577888-pkgkj
+21m         Normal    Pulling                pod/backend-bff859d99-sdgx7          Pulling image "ghcr.io/anurag-bit/sih-tj-backend:latest"
+21m         Normal    ScalingReplicaSet      deployment/backend                   Scaled up replica set backend-bff859d99 from 0 to 2
+21m         Normal    Scheduled              pod/backend-bff859d99-g48td          Successfully assigned sih-solvers-compass/backend-bff859d99-g48td to ip-10-0-1-52.ec2.internal
+21m         Normal    Pulling                pod/backend-bff859d99-g48td          Pulling image "ghcr.io/anurag-bit/sih-tj-backend:latest"
+21m         Normal    SuccessfulCreate       replicaset/backend-bff859d99         Created pod: backend-bff859d99-sdgx7
+21m         Normal    SuccessfulCreate       replicaset/backend-bff859d99         Created pod: backend-bff859d99-g48td
+21m         Normal    Scheduled              pod/backend-bff859d99-sdgx7          Successfully assigned sih-solvers-compass/backend-bff859d99-sdgx7 to ip-10-0-2-234.ec2.internal
+21m         Normal    ScalingReplicaSet      deployment/frontend                  Scaled up replica set frontend-66b578b86 from 0 to 2
+21m         Normal    SuccessfulCreate       replicaset/frontend-66b578b86        Created pod: frontend-66b578b86-wfl66
+21m         Normal    Scheduled              pod/frontend-66b578b86-wfl66         Successfully assigned sih-solvers-compass/frontend-66b578b86-wfl66 to ip-10-0-2-234.ec2.internal
+21m         Normal    SuccessfulCreate       replicaset/frontend-66b578b86        Created pod: frontend-66b578b86-n2cf8
+21m         Normal    Scheduled              pod/frontend-66b578b86-n2cf8         Successfully assigned sih-solvers-compass/frontend-66b578b86-n2cf8 to ip-10-0-1-52.ec2.internal
+21m         Normal    EnsuringLoadBalancer   service/frontend                     Ensuring load balancer
+21m         Normal    Pulling                pod/frontend-66b578b86-n2cf8         Pulling image "ghcr.io/anurag-bit/sih-tj-frontend:latest"
+21m         Normal    Pulling                pod/frontend-66b578b86-wfl66         Pulling image "ghcr.io/anurag-bit/sih-tj-frontend:latest"
+21m         Normal    EnsuredLoadBalancer    service/frontend                     Ensured load balancer
+21m         Normal    Created                pod/frontend-66b578b86-wfl66         Created container: frontend
+21m         Normal    Pulled                 pod/frontend-66b578b86-wfl66         Successfully pulled image "ghcr.io/anurag-bit/sih-tj-frontend:latest" in 8.228s (8.228s including waiting). Image size: 22676620 bytes.
+21m         Normal    Started                pod/frontend-66b578b86-wfl66         Started container frontend
+21m         Normal    Pulled                 pod/frontend-66b578b86-n2cf8         Successfully pulled image "ghcr.io/anurag-bit/sih-tj-frontend:latest" in 12.841s (12.841s including waiting). Image size: 22676620 bytes.
+21m         Normal    Created                pod/frontend-66b578b86-n2cf8         Created container: frontend
+21m         Normal    Started                pod/frontend-66b578b86-n2cf8         Started container frontend
+19m         Normal    Started                pod/backend-bff859d99-sdgx7          Started container backend
+19m         Normal    Created                pod/backend-bff859d99-g48td          Created container: backend
+19m         Normal    Started                pod/backend-bff859d99-g48td          Started container backend
+19m         Normal    Pulled                 pod/backend-bff859d99-g48td          Successfully pulled image "ghcr.io/anurag-bit/sih-tj-backend:latest" in 2m16.5s (2m16.5s including waiting). Image size: 4380972803 bytes.
+19m         Normal    Pulled                 pod/backend-bff859d99-sdgx7          Successfully pulled image "ghcr.io/anurag-bit/sih-tj-backend:latest" in 2m17.013s (2m17.013s including waiting). Image size: 4380972803 bytes.
+19m         Normal    Created                pod/backend-bff859d99-sdgx7          Created container: backend
+18m         Warning   Unhealthy              pod/backend-bff859d99-sdgx7          Liveness probe failed: Get "http://10.0.2.68:8000/health": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+16m         Normal    ExternalProvisioning   persistentvolumeclaim/chromadb-pvc   Waiting for a volume to be created either by the external provisioner 'ebs.csi.aws.com' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+16m         Warning   FailedScheduling       pod/chromadb-fbc577888-pkgkj         running PreBind plugin "VolumeBinding": binding volumes: failed to check provisioning pvc: could not find v1.PersistentVolumeClaim "sih-solvers-compass/chromadb-pvc"
+16m         Warning   FailedScheduling       pod/chromadb-fbc577888-pkgkj         0/2 nodes are available: persistentvolumeclaim "chromadb-pvc" not found. preemption: 0/2 nodes are available: 2 Preemption is not helpful for scheduling.
+16m         Warning   FailedScheduling       pod/chromadb-fbc577888-pkgkj         running PreFilter plugin "VolumeBinding": error getting PVC "sih-solvers-compass/chromadb-pvc": could not find v1.PersistentVolumeClaim "sih-solvers-compass/chromadb-pvc"
+16m         Normal    WaitForPodScheduled    persistentvolumeclaim/chromadb-pvc   waiting for pod chromadb-fbc577888-pkgkj to be scheduled
+14m         Warning   ProvisioningFailed     persistentvolumeclaim/chromadb-pvc   failed to provision volume with StorageClass "gp2": error generating accessibility requirements: no topology key found on CSINode ip-10-0-1-52.ec2.internal
+12m         Warning   FailedScheduling       pod/chromadb-fbc577888-zgrmr         0/2 nodes are available: 1 Insufficient cpu, 1 Insufficient memory, 1 node(s) didn't find available persistent volumes to bind. preemption: 0/2 nodes are available: 1 No preemption victims found for incoming pod, 1 Preemption is not helpful for scheduling.
+12m         Normal    SuccessfulCreate       replicaset/chromadb-fbc577888        Created pod: chromadb-fbc577888-zgrmr
+12m         Warning   FailedScheduling       pod/chromadb-fbc577888-pkgkj         running PreBind plugin "VolumeBinding": binding volumes: pod does not exist any more: pod "chromadb-fbc577888-pkgkj" not found
+11m         Warning   Unhealthy              pod/backend-bff859d99-g48td          Readiness probe failed: Get "http://10.0.1.32:8000/health": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+10m         Warning   ProvisioningFailed     persistentvolumeclaim/chromadb-pvc   failed to provision volume with StorageClass "gp2": rpc error: code = Internal desc = Could not create volume "pvc-d3046252-5037-43bf-8c35-c5f7c45b2f3b": could not create volume in EC2: operation error EC2: CreateVolume, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, canceled, context deadline exceeded
+9m54s       Normal    ScalingReplicaSet      deployment/backend                   Scaled up replica set backend-b84cfcfdd from 0 to 1
+9m54s       Normal    Scheduled              pod/backend-b84cfcfdd-dr9b4          Successfully assigned sih-solvers-compass/backend-b84cfcfdd-dr9b4 to ip-10-0-2-234.ec2.internal
+9m54s       Normal    SuccessfulCreate       replicaset/backend-b84cfcfdd         Created pod: backend-b84cfcfdd-dr9b4
+9m53s       Normal    Pulled                 pod/backend-b84cfcfdd-dr9b4          Successfully pulled image "ghcr.io/anurag-bit/sih-tj-backend:latest" in 143ms (143ms including waiting). Image size: 4380972803 bytes.
+9m21s       Warning   FailedScheduling       pod/backend-b84cfcfdd-vz48w          0/2 nodes are available: 2 Insufficient cpu, 2 Insufficient memory. preemption: 0/2 nodes are available: 2 No preemption victims found for incoming pod.
+9m21s       Normal    SuccessfulDelete       replicaset/backend-bff859d99         Deleted pod: backend-bff859d99-sdgx7
+9m21s       Normal    ScalingReplicaSet      deployment/backend                   Scaled down replica set backend-bff859d99 from 2 to 1
+9m21s       Normal    ScalingReplicaSet      deployment/backend                   Scaled up replica set backend-b84cfcfdd from 1 to 2
+9m21s       Normal    Killing                pod/backend-bff859d99-sdgx7          Stopping container backend
+9m21s       Normal    SuccessfulCreate       replicaset/backend-b84cfcfdd         Created pod: backend-b84cfcfdd-vz48w
+9m20s       Warning   Unhealthy              pod/backend-bff859d99-sdgx7          Readiness probe failed: Get "http://10.0.2.68:8000/health": dial tcp 10.0.2.68:8000: connect: connection refused
+9m18s       Normal    Scheduled              pod/backend-b84cfcfdd-vz48w          Successfully assigned sih-solvers-compass/backend-b84cfcfdd-vz48w to ip-10-0-2-234.ec2.internal
+9m17s       Normal    Pulled                 pod/backend-b84cfcfdd-vz48w          Successfully pulled image "ghcr.io/anurag-bit/sih-tj-backend:latest" in 149ms (149ms including waiting). Image size: 4380972803 bytes.
+8m45s       Normal    SuccessfulDelete       replicaset/backend-bff859d99         Deleted pod: backend-bff859d99-g48td
+8m45s       Normal    Killing                pod/backend-bff859d99-g48td          Stopping container backend
+8m45s       Normal    ScalingReplicaSet      deployment/backend                   Scaled down replica set backend-bff859d99 from 1 to 0
+6m42s       Normal    Pulled                 pod/backend-b84cfcfdd-dr9b4          Successfully pulled image "ghcr.io/anurag-bit/sih-tj-backend:latest" in 518ms (518ms including waiting). Image size: 4380972803 bytes.
+6m42s       Warning   Unhealthy              pod/backend-b84cfcfdd-dr9b4          Readiness probe failed: Get "http://10.0.2.117:8000/health": read tcp 10.0.2.234:44824->10.0.2.117:8000: read: connection reset by peer
+5m49s       Normal    Provisioning           persistentvolumeclaim/chromadb-pvc   External provisioner is provisioning volume for claim "sih-solvers-compass/chromadb-pvc"
+5m44s       Warning   ProvisioningFailed     persistentvolumeclaim/chromadb-pvc   failed to provision volume with StorageClass "gp2": rpc error: code = Internal desc = Could not create volume "pvc-d3046252-5037-43bf-8c35-c5f7c45b2f3b": could not create volume in EC2: operation error EC2: CreateVolume, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, request canceled, context deadline exceeded
+5m12s       Warning   Unhealthy              pod/backend-b84cfcfdd-dr9b4          Liveness probe failed: Get "http://10.0.2.117:8000/health": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+5m12s       Warning   Unhealthy              pod/backend-b84cfcfdd-dr9b4          Readiness probe failed: Get "http://10.0.2.117:8000/health": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+5m12s       Normal    Killing                pod/backend-b84cfcfdd-dr9b4          Container backend failed liveness probe, will be restarted
+5m6s        Normal    Killing                pod/backend-b84cfcfdd-vz48w          Container backend failed liveness probe, will be restarted
+5m6s        Warning   Unhealthy              pod/backend-b84cfcfdd-vz48w          Liveness probe failed: Get "http://10.0.2.142:8000/health": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+4m42s       Normal    Pulled                 pod/backend-b84cfcfdd-dr9b4          Successfully pulled image "ghcr.io/anurag-bit/sih-tj-backend:latest" in 139ms (139ms including waiting). Image size: 4380972803 bytes.
+4m42s       Normal    Pulling                pod/backend-b84cfcfdd-dr9b4          Pulling image "ghcr.io/anurag-bit/sih-tj-backend:latest"
+4m42s       Normal    Created                pod/backend-b84cfcfdd-dr9b4          Created container: backend
+4m42s       Normal    Started                pod/backend-b84cfcfdd-dr9b4          Started container backend
+4m40s       Warning   Unhealthy              pod/backend-b84cfcfdd-vz48w          Readiness probe failed: Get "http://10.0.2.142:8000/health": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+4m36s       Warning   Unhealthy              pod/backend-b84cfcfdd-vz48w          Readiness probe failed: Get "http://10.0.2.142:8000/health": read tcp 10.0.2.234:54182->10.0.2.142:8000: read: connection reset by peer
+4m36s       Normal    Pulling                pod/backend-b84cfcfdd-vz48w          Pulling image "ghcr.io/anurag-bit/sih-tj-backend:latest"
+4m36s       Normal    Created                pod/backend-b84cfcfdd-vz48w          Created container: backend
+4m36s       Normal    Started                pod/backend-b84cfcfdd-vz48w          Started container backend
+4m36s       Normal    Pulled                 pod/backend-b84cfcfdd-vz48w          Successfully pulled image "ghcr.io/anurag-bit/sih-tj-backend:latest" in 160ms (160ms including waiting). Image size: 4380972803 bytes.
+2m38s       Warning   FailedScheduling       pod/chromadb-fbc577888-zgrmr         running PreBind plugin "VolumeBinding": binding volumes: context deadline exceeded
+60s         Normal    ExternalProvisioning   persistentvolumeclaim/chromadb-pvc   Waiting for a volume to be created either by the external provisioner 'ebs.csi.aws.com' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.

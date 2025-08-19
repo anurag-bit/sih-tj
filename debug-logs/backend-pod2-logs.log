@@ -1,0 +1,300 @@
+2025-08-19 10:49:35,996 - INFO - Loading sentence transformer model: all-MiniLM-L6-v2
+2025-08-19 10:49:35,996 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2025-08-19 10:49:38,253 - INFO - Use pytorch device_name: cpu
+2025-08-19 10:49:38,256 - INFO - Starting data ingestion process...
+2025-08-19 10:49:38,256 - INFO - Attempting to connect to ChromaDB HTTP server at localhost:8000
+2025-08-19 10:49:38,284 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-08-19 10:49:38,368 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+INFO:app.middleware:Request: GET /api/v1/tenants/default_tenant
+INFO:app.middleware:Response: 404 - Time: 0.002s - Path: /api/v1/tenants/default_tenant
+INFO:     127.0.0.1:45212 - "GET /api/v1/tenants/default_tenant HTTP/1.1" 404 Not Found
+2025-08-19 10:49:38,385 - WARNING - HTTP connection failed: Could not connect to tenant default_tenant. Are you sure it exists?
+2025-08-19 10:49:38,385 - INFO - Falling back to embedded ChromaDB client for testing
+2025-08-19 10:49:38,386 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-08-19 10:49:38,657 - ERROR - Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-08-19 10:49:38,683 - ERROR - Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-08-19 10:49:38,684 - INFO - Connected to collection: problem_statements
+2025-08-19 10:49:38,685 - INFO - Downloading data from HuggingFace: prof-freakenstein/SIH2024
+2025-08-19 10:49:38,747 - INFO - PyTorch version 2.8.0 available.
+2025-08-19 10:49:39,262 - INFO - Using HuggingFace datasets library to load SIH2024 dataset
+Downloading readme: 0.00B [00:00, ?B/s]Downloading readme: 4.58kB [00:00, 8.07MB/s]
+Downloading data:   0%|          | 0.00/265k [00:00<?, ?B/s]Downloading data: 100%|██████████| 265k/265k [00:00<00:00, 8.80MB/s]
+Downloading data:   0%|          | 0.00/101k [00:00<?, ?B/s]Downloading data: 100%|██████████| 101k/101k [00:00<00:00, 4.70MB/s]
+Generating train split: 0 examples [00:00, ? examples/s]Generating train split: 188 examples [00:00, 5404.51 examples/s]
+Generating test split: 0 examples [00:00, ? examples/s]Generating test split: 46 examples [00:00, 9920.71 examples/s]
+2025-08-19 10:49:39,918 - INFO - Processing split: train
+2025-08-19 10:49:39,935 - INFO - Processing split: test
+2025-08-19 10:49:39,940 - INFO - Downloaded 234 problem statements from HuggingFace dataset
+2025-08-19 10:49:39,940 - INFO - Validating problem statements...
+2025-08-19 10:49:39,984 - INFO - Validated 234 out of 234 problem statements
+2025-08-19 10:49:39,985 - INFO - Generating vector embeddings...
+Batches:   0%|          | 0/8 [00:00<?, ?it/s]Batches:  12%|█▎        | 1/8 [00:04<00:31,  4.57s/it]INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.004s - Path: /health
+INFO:     10.0.2.234:46924 - "GET /health HTTP/1.1" 200 OK
+Batches:  25%|██▌       | 2/8 [00:09<00:27,  4.60s/it]INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.007s - Path: /health
+INFO:     10.0.2.234:46930 - "GET /health HTTP/1.1" 200 OK
+Batches:  38%|███▊      | 3/8 [00:13<00:22,  4.41s/it]Batches:  50%|█████     | 4/8 [00:17<00:16,  4.24s/it]INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:51680 - "GET /health HTTP/1.1" 200 OK
+Batches:  62%|██████▎   | 5/8 [00:20<00:11,  3.99s/it]INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.002s - Path: /health
+INFO:     10.0.2.234:51686 - "GET /health HTTP/1.1" 200 OK
+Batches:  75%|███████▌  | 6/8 [00:24<00:07,  3.82s/it]Batches:  88%|████████▊ | 7/8 [00:25<00:02,  2.83s/it]Batches: 100%|██████████| 8/8 [00:25<00:00,  1.97s/it]Batches: 100%|██████████| 8/8 [00:25<00:00,  3.16s/it]
+2025-08-19 10:50:05,338 - INFO - Generated 234 embeddings
+2025-08-19 10:50:05,341 - INFO - Storing data in ChromaDB...
+2025-08-19 10:50:05,645 - ERROR - Failed to send telemetry event CollectionAddEvent: capture() takes 1 positional argument but 3 were given
+2025-08-19 10:50:05,645 - INFO - Successfully stored 234 problem statements in ChromaDB
+/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:   0%|          | 0.00/79.3M [00:00<?, ?iB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:   9%|▉         | 7.50M/79.3M [00:00<00:00, 78.6MiB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:  19%|█▉        | 15.0M/79.3M [00:00<00:00, 77.6MiB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:  29%|██▊       | 22.8M/79.3M [00:00<00:00, 79.3MiB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:  38%|███▊      | 30.3M/79.3M [00:00<00:00, 78.5MiB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:  48%|████▊     | 37.8M/79.3M [00:00<00:00, 77.3MiB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:  57%|█████▋    | 45.2M/79.3M [00:00<00:00, 75.9MiB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:  66%|██████▌   | 52.4M/79.3M [00:00<00:00, 72.9MiB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:  75%|███████▍  | 59.4M/79.3M [00:00<00:00, 67.1MiB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:  84%|████████▍ | 66.9M/79.3M [00:00<00:00, 70.3MiB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz:  94%|█████████▍| 74.7M/79.3M [00:01<00:00, 73.2MiB/s]/home/app/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz: 100%|██████████| 79.3M/79.3M [00:01<00:00, 74.5MiB/s]
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:48974 - "GET /health HTTP/1.1" 200 OK
+2025-08-19 10:50:08,034 - ERROR - Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+2025-08-19 10:50:08,034 - INFO - Verification complete: {'total_documents': 234, 'sample_query_results': 5, 'collection_name': 'problem_statements', 'status': 'success'}
+
+==================================================
+DATA INGESTION RESULTS
+==================================================
+Status: success
+Total Downloaded: 234
+Total Valid: 234
+Total Stored: 234
+
+==================================================
+TESTING SEARCH FUNCTIONALITY
+==================================================
+
+--- Query: 'machine learning for healthcare' ---
+1. Developing a system for Patient Care in the Health Sector (Distance: 0.545)
+   Organization: Government of Kerala
+   Category: Robotics and Drones - Hardware
+   Tech Stack: Go
+
+2. AI Assisted Telemedicine KIOSK for Rural India (Distance: 0.580)
+   Organization: Government of Kerala
+   Category: Agriculture, FoodTech  Rural Development - Software
+   Tech Stack: Go, Ios
+
+3. Optimizing Doctor Availability and Appointment Allocation in Hospitals through Digital Technology and Al Integration. (Distance: 0.598)
+   Organization: Govt of Himachal Pradesh
+   Category: MedTech  BioTech  HealthTech - Software
+   Tech Stack: Iot, Go
+
+
+--- Query: 'blockchain technology' ---
+1. Online Blockchain based certificate generation and validation system for government organization. (Distance: 0.522)
+   Organization: Government of Gujarat
+   Category: Blockchain  Cybersecurity - Software
+   Tech Stack: Blockchain, Go
+
+2. Student Innovation (Distance: 0.524)
+   Organization: AICTE, MICStudent Innovation
+   Category: Blockchain  Cybersecurity - Software
+   Tech Stack: Blockchain, Go
+
+3. Student Innovation (Distance: 0.530)
+   Organization: AICTE, MICStudent Innovation
+   Category: Blockchain  Cybersecurity - Hardware
+   Tech Stack: Blockchain, Go
+
+
+--- Query: 'IoT sensors for agriculture' ---
+1. Onestop solution for monitoring dairy plant energy consumption, hygiene and packaging waste collection from consumers. (Distance: 0.542)
+   Organization: Ministry of Fisheries, Animal Husbandry and Dairying
+   Category: Agriculture, FoodTech  Rural Development - Hardware
+   Tech Stack: Go
+
+2. Automatic regulation of valves for release of water based upon soil moisture availability in the root zone of the crop, using artificial intelligence, in a piped and micro irrigation network of irrigation system. (Distance: 0.598)
+   Organization: Ministry of Jal Shakti
+   Category: Agriculture, FoodTech  Rural Development - Hardware
+   Tech Stack: Swift, Go, Rust
+
+3. Vegetation measurement along the line corridor using satellite imagery (Distance: 0.605)
+   Organization: Ministry of Power
+   Category: Agriculture, FoodTech  Rural Development - Software
+   Tech Stack: Machine Learning, Go
+
+
+--- Query: 'web development with React' ---
+1. Online integrated platform for projects taken up by the students of various universitiescolleges (Distance: 0.765)
+   Organization: Government of Jharkhand
+   Category: Smart Education - Software
+   Tech Stack: Go
+
+2. Web Mobile based tool for mapping of Water supply network (Distance: 0.768)
+   Organization: Ministry of Jal Shakti
+   Category: Miscellaneous - Software
+   Tech Stack: Iot, Go
+
+3. Use of Digital Technology to calculate water footprints for different daily use items. (Distance: 0.794)
+   Organization: Ministry of Jal Shakti
+   Category: Clean  Green Technology - Software
+   Tech Stack: Blockchain, Go
+
+==================================================
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:48982 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:58240 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:58256 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:58258 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:48660 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:48670 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:48674 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:45562 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:45564 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:45574 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:55754 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:55758 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:55772 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:48914 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:48924 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:48936 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.002s - Path: /health
+INFO:     10.0.2.234:36402 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:36410 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:36412 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:58414 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:58424 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:58432 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:40056 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:40072 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:40086 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:44524 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:44538 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:44542 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:46656 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:46664 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:46672 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:49278 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:49288 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:49294 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:56084 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:56094 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:56104 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:60362 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:60372 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:60382 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:42764 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:42774 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:42784 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:37238 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:37240 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:37254 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:44228 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:44240 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:44246 - "GET /health HTTP/1.1" 200 OK
+INFO:     10.0.2.234:40210 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:40214 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:40230 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:35040 - "GET /health HTTP/1.1" 200 OK
+INFO:app.middleware:Request: GET /health
+INFO:app.middleware:Response: 200 - Time: 0.001s - Path: /health
+INFO:     10.0.2.234:35044 - "GET /health HTTP/1.1" 200 OK

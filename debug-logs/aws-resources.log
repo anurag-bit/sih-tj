@@ -1,0 +1,40 @@
+=== LOAD BALANCER INFO ===
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"labels":{"app":"frontend"},"name":"frontend","namespace":"sih-solvers-compass"},"spec":{"ports":[{"port":80,"targetPort":8080}],"selector":{"app":"frontend"},"type":"LoadBalancer"}}
+  creationTimestamp: "2025-08-19T10:32:25Z"
+  finalizers:
+  - service.kubernetes.io/load-balancer-cleanup
+  labels:
+    app: frontend
+  name: frontend
+  namespace: sih-solvers-compass
+  resourceVersion: "1914"
+  uid: cf8be5fb-f9a0-48cd-a546-95f88bd88101
+spec:
+  allocateLoadBalancerNodePorts: true
+  clusterIP: 172.20.86.217
+  clusterIPs:
+  - 172.20.86.217
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - nodePort: 31997
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: frontend
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+    - hostname: acf8be5fbf9a048cda54695f88bd8810-1872743573.us-east-1.elb.amazonaws.com
+
