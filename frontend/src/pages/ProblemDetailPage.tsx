@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeftIcon, 
   BuildingOfficeIcon, 
   TagIcon,
   ChatBubbleLeftRightIcon,
+  CodeBracketIcon,
   ScaleIcon
 } from '@heroicons/react/24/outline';
 import ChatInterface from '../components/ui/ChatInterface';
@@ -23,17 +24,11 @@ interface ProblemStatement {
   created_at?: string;
 }
 
-interface DetailItemProps {
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  label: string;
-  value: string | string[] | React.ReactNode;
-}
-
-const DetailItem: React.FC<DetailItemProps> = ({ icon: Icon, label, value }) => (
+const DetailItem = ({ icon: Icon, label, value }) => (
   <div className="flex items-center text-sm text-gray-600">
     <Icon className="w-5 h-5 mr-3 text-gray-400" />
     <span className="font-medium text-gray-700 mr-2">{label}:</span>
-    <span>{Array.isArray(value) ? value.join(', ') : value}</span>
+    <span>{value}</span>
   </div>
 );
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
 import Button from './Button';
@@ -44,7 +44,7 @@ interface GitHubModalProps {
 
 const GitHubModal: React.FC<GitHubModalProps> = ({ isOpen, onClose }) => {
   const [username, setUsername] = useState('');
-  const [_profile, setProfile] = useState<GitHubProfile | null>(null);
+  const [profile, setProfile] = useState<GitHubProfile | null>(null);
   const [recommendations, setRecommendations] = useState<SearchResult[]>([]);
   const [step, setStep] = useState<'input' | 'analysis' | 'recommendations'>('input');
   
