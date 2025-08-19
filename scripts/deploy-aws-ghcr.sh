@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # GHCR-Based AWS Deployment Script
 # Usage: ./deploy-aws-ghcr.sh [options]
@@ -8,7 +8,7 @@
 #   --destroy       : Destroy infrastructure instead of creating
 #   --help          : Show this help message
 
-set -e
+set -euo pipefail
 
 # Color codes for output
 RED='\033[0;31m'
@@ -99,9 +99,10 @@ main() {
     # Load environment variables
     print_status "Loading environment variables from .env file..."
     # The script is in the 'scripts' directory, so we look for .env in the parent directory
-    ENV_FILE="$(dirname "$0")/../.env"
+    ENV_FILE="$PROJECT_ROOT/.env"
     if [ -f "$ENV_FILE" ]; then
-        export $(cat "$ENV_FILE" | grep -v '^#' | xargs)
+        # shellcheck disable=SC1090
+        set -o allexport; source "$ENV_FILE"; set +o allexport
         print_success "Environment variables loaded from $ENV_FILE"
     else
         print_error ".env file not found at $ENV_FILE. Please ensure it exists in the project root."
@@ -137,14 +138,14 @@ main() {
     
     # Initialize Terraform
     print_status "Initializing Terraform..."
-    cd "$TERRAFORM_DIR"
-    terraform init
+    pushd "$TERRAFORM_DIR" >/dev/null
+    terraform init -upgrade -input=false
     print_success "Terraform initialized"
     
     # Create Terraform execution plan
     if [ "$DESTROY" = true ]; then
         print_status "Creating Terraform destroy plan..."
-        terraform plan -destroy -var="OPENROUTER_API_KEY=$OPENROUTER_API_KEY" -out=destroy-plan
+    terraform plan -destroy -var="OPENROUTER_API_KEY=$OPENROUTER_API_KEY" -out=destroy-plan
         
         if [ "$PLAN_ONLY" = true ]; then
             print_success "Destroy plan created successfully. Review the plan above."
@@ -164,12 +165,12 @@ main() {
         fi
         
         print_status "Destroying AWS infrastructure..."
-        terraform apply destroy-plan
+    terraform apply destroy-plan
         print_success "Infrastructure destroyed successfully!"
         exit 0
     else
         print_status "Creating Terraform execution plan..."
-        terraform plan -var="OPENROUTER_API_KEY=$OPENROUTER_API_KEY" -out=tfplan
+    terraform plan -var="OPENROUTER_API_KEY=$OPENROUTER_API_KEY" -out=tfplan
         
         if [ "$PLAN_ONLY" = true ]; then
             print_success "Plan created successfully. Review the plan above."
@@ -209,15 +210,27 @@ main() {
         exit 1
     fi
     
-    cd ../..
+    popd >/dev/null
     
     # Kubernetes Deployment
     print_status "Kubernetes Deployment"
     echo "========================"
     
+    # Wait for EKS cluster to be ACTIVE
+    print_status "Waiting for EKS cluster to be ACTIVE..."
+    for i in {1..60}; do
+        STATUS=$(aws eks describe-cluster --name "$EKS_CLUSTER_NAME" --region "$AWS_REGION" --query 'cluster.status' --output text || echo "UNKNOWN")
+        [[ "$STATUS" == "ACTIVE" ]] && break
+        sleep 10
+    done
+    if [[ "$STATUS" != "ACTIVE" ]]; then
+        print_error "EKS cluster not ACTIVE (status=$STATUS)"
+        exit 1
+    fi
+
     # Configure kubectl
     print_status "Configuring kubectl for EKS cluster..."
-    aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+    aws eks update-kubeconfig --name "$EKS_CLUSTER_NAME" --region "$AWS_REGION"
     print_success "kubectl configured"
     
     # Verify cluster connectivity
@@ -227,13 +240,42 @@ main() {
     
     # Create namespace and secrets
     print_status "Creating Kubernetes namespace and secrets..."
-    kubectl apply -f infrastructure/k8s/namespace.yaml
-    kubectl apply -f infrastructure/k8s/secrets.yaml
+        kubectl apply -f "$K8S_DIR/namespace.yaml"
+        kubectl apply -f "$K8S_DIR/secrets.yaml"
+
+        # Populate secrets from .env (base64-encode values)
+        NAMESPACE="sih-solvers-compass"
+        GEMINI_VAL="${GEMINI_API_KEY:-}"
+        OPENROUTER_VAL="${OPENROUTER_API_KEY:-}"
+        GITHUB_VAL="${GITHUB_TOKEN:-}"
+
+        b64() { printf %s "$1" | base64 -w0 2>/dev/null || printf %s "$1" | base64 | tr -d '\n'; }
+        GEMINI_B64=$(b64 "$GEMINI_VAL")
+        OPENROUTER_B64=$(b64 "$OPENROUTER_VAL")
+        GITHUB_B64=$(b64 "$GITHUB_VAL")
+
+        print_status "Patching Kubernetes secret with provided API keys..."
+        kubectl -n "$NAMESPACE" patch secret sih-secrets \
+            --type merge -p "{\"data\":{\"gemini-api-key\":\"$GEMINI_B64\",\"openrouter-api-key\":\"$OPENROUTER_B64\",\"github-token\":\"$GITHUB_B64\"}}" || true
     print_success "Namespace and secrets created"
     
     # Ensure gp3 StorageClass is default
-    print_status "Applying gp3 default StorageClass..."
-    kubectl apply -f infrastructure/k8s/storage-gp3-default.yaml
+        print_status "Applying gp3 default StorageClass (inline)..."
+        cat <<'EOF' | kubectl apply -f -
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+    name: gp3-default
+    annotations:
+        storageclass.kubernetes.io/is-default-class: "true"
+provisioner: ebs.csi.aws.com
+allowVolumeExpansion: true
+parameters:
+    type: gp3
+    iops: "3000"
+    throughput: "125"
+volumeBindingMode: WaitForFirstConsumer
+EOF
     # Remove default annotation from any other StorageClass
     DEFAULT_SCS=$(kubectl get sc -o jsonpath='{range .items[?(@.metadata.annotations.storageclass\u002ekubernetes\u002eio/is-default-class=="true")]}{.metadata.name}{"\n"}{end}' || true)
     for sc in $DEFAULT_SCS; do
@@ -250,20 +292,27 @@ main() {
         print_status "Deleting Pending chromadb-pvc to rebind with default StorageClass..."
         kubectl delete pvc chromadb-pvc -n sih-solvers-compass --wait=true || true
     fi
-    kubectl apply -f infrastructure/k8s/chromadb-optimal.yaml
+    kubectl apply -f "$K8S_DIR/chromadb-optimal.yaml"
     print_status "Waiting for ChromaDB to be available..."
-    kubectl wait --for=condition=available --timeout=300s deployment/chromadb -n sih-solvers-compass
+    kubectl -n sih-solvers-compass rollout status deploy/chromadb --timeout=10m
 
     # Deploy backend and frontend
     print_status "Deploying backend and frontend with GHCR images..."
-    kubectl apply -f infrastructure/k8s/backend-fixed.yaml
-    kubectl apply -f infrastructure/k8s/frontend-fixed.yaml
+            # Apply frontend NGINX ConfigMap only if present AND non-empty to avoid kubectl 'no objects' error
+            if [[ -s "$K8S_DIR/frontend-nginx-configmap.yaml" ]]; then
+                kubectl apply -f "$K8S_DIR/frontend-nginx-configmap.yaml"
+            else
+                print_warning "Skipping frontend-nginx-configmap.yaml (missing or empty)."
+            fi
+
+        kubectl apply -f "$K8S_DIR/backend-fixed.yaml"
+        kubectl apply -f "$K8S_DIR/frontend-fixed.yaml"
     print_success "Applications deployed"
     
     # Wait for deployments to be ready
     print_status "Waiting for deployments to be ready..."
-    kubectl wait --for=condition=available --timeout=300s deployment/backend -n sih-solvers-compass
-    kubectl wait --for=condition=available --timeout=300s deployment/frontend -n sih-solvers-compass
+    kubectl -n sih-solvers-compass rollout status deploy/backend --timeout=10m
+    kubectl -n sih-solvers-compass rollout status deploy/frontend --timeout=10m
     print_success "All deployments are ready"
     
     # Get service information

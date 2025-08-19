@@ -203,7 +203,9 @@ Please answer the following question about this specific problem statement:"""
                                 logger.warning(f"Received non-JSON data from stream: {data_str}")
                                 continue
             except httpx.HTTPStatusError as e:
-                logger.error(f"OpenRouter API call failed with status {e.response.status_code}: {e.response.text}")
+                # Avoid reading the streaming body again; log status and reason only
+                status = e.response.status_code if e.response is not None else "unknown"
+                logger.error(f"OpenRouter API call failed with status {status}")
                 raise
             except Exception as e:
                 logger.error(f"OpenRouter streaming API call failed: {str(e)}")

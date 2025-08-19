@@ -33,7 +33,7 @@ class SearchResult(BaseModel):
 class ChatRequest(BaseModel):
     """Chat request model."""
     problem_id: str = Field(..., description="Problem statement ID for context")
-    problem_context: str = Field(..., description="Full problem statement context")
+    problem_context: str = Field(..., min_length=1, description="Full problem statement context")
     user_question: str = Field(..., min_length=1, description="User's question about the problem")
     model: Optional[str] = Field(default=None, description="Selected AI model to use for response")
 

@@ -18,6 +18,7 @@ spec:
       containers:
       - name: frontend
         image: ghcr.io/anurag-bit/sih-tj-frontend:latest  # GHCR instead of ECR
+  imagePullPolicy: Always
         ports:
         - containerPort: 8080  # Non-privileged port
         env:

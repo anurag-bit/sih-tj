@@ -108,7 +108,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
-      const response = await fetch('/api/chat/stream', {
+  const response = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -172,8 +172,29 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send message');
-      setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId));
+      // Fallback to non-streaming endpoint
+      try {
+        const fallback = await fetch('/api/chat/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            problem_id: problemId,
+            problem_context: problemContext,
+            user_question: question.trim(),
+            model: selectedModel?.id || null
+          })
+        });
+        if (!fallback.ok) throw new Error(`Fallback chat failed: ${fallback.statusText}`);
+        const data = await fallback.json();
+        setMessages(prev => prev.map(msg => 
+          msg.id === assistantMessageId 
+            ? { ...msg, content: data.response || '', isStreaming: false }
+            : msg
+        ));
+      } catch (fallbackErr) {
+        setError(fallbackErr instanceof Error ? fallbackErr.message : 'Failed to send message');
+        setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId));
+      }
     } finally {
       setIsLoading(false);
     }

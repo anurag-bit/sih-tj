@@ -18,6 +18,7 @@ spec:
       containers:
       - name: backend
         image: ghcr.io/anurag-bit/sih-tj-backend:latest  # GHCR instead of ECR
+  imagePullPolicy: Always
         ports:
         - containerPort: 8000
         env:
