@@ -1,6 +1,7 @@
 """
 Chat service for interactive problem statement exploration using OpenRouter.
 """
+import os
 import httpx
 import json
 from typing import AsyncGenerator, List, Dict
@@ -19,16 +20,21 @@ class ChatService:
         
         self.api_key = settings.openrouter_api_key
         self.api_url = "https://openrouter.ai/api/v1/chat/completions"
+        # OpenRouter recommends sending referer and title headers
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            # Use configurable/default values to satisfy OpenRouter app attribution
+            "HTTP-Referer": os.getenv("OPENROUTER_REFERER", "https://localhost"),
+            "X-Title": settings.app_name,
         }
         # Define a default set of models to use as a fallback
+        # Use only the originally chosen free models; do not include openrouter/auto
         self.default_models = [
             "openai/gpt-oss-20b:free",
             "google/gemini-flash-1.5",
             "moonshotai/kimi-k2:free",
-            "google/gemma-3n-e2b-it:free"
+            "google/gemma-3n-e2b-it:free",
         ]
         
         # Define model metadata for the UI
@@ -70,8 +76,8 @@ class ChatService:
                 "provider": "Anthropic"
             }
         ]
-        
-        self.default_model_id = self.default_models[0]
+    # Set the default model id (first in fallback list)
+    self.default_model_id = self.default_models[0]
 
     def _validate_context(self, problem_context: str) -> bool:
         """

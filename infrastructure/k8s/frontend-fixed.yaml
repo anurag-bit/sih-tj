@@ -16,38 +16,38 @@ spec:
         app: frontend
     spec:
       containers:
-      - name: frontend
-        image: ghcr.io/anurag-bit/sih-tj-frontend:latest  # GHCR instead of ECR
-  imagePullPolicy: Always
-        ports:
-        - containerPort: 8080  # Non-privileged port
-        env:
-        - name: NODE_ENV
-          value: "production"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        # Fix port binding by configuring nginx for port 8080
-        command: ["/bin/sh"]
-        args: ["-c", "sed -i 's/listen 80/listen 8080/g' /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          failureThreshold: 3
+        - name: frontend
+          image: ghcr.io/anurag-bit/sih-tj-frontend:latest  # GHCR instead of ECR
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080  # Non-privileged port
+          env:
+            - name: NODE_ENV
+              value: "production"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Fix port binding by configuring nginx for port 8080
+          command: ["/bin/sh"]
+          args: ["-c", "sed -i 's/listen 80/listen 8080/g' /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
@@ -59,7 +59,7 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-  - port: 80
-    targetPort: 8080  # Map external 80 to internal 8080
+    - port: 80
+      targetPort: 8080  # Map external 80 to internal 8080
   selector:
     app: frontend
