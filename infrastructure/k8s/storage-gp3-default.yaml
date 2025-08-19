@@ -1,13 +1,13 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: gp3-default
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
+	name: gp3-default
+	annotations:
+		storageclass.kubernetes.io/is-default-class: "true"
 provisioner: ebs.csi.aws.com
 allowVolumeExpansion: true
 parameters:
-  type: gp3
-  iops: "3000"
-  throughput: "125"
+	type: gp3
+	iops: "3000"
+	throughput: "125"
 volumeBindingMode: WaitForFirstConsumer

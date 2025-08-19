@@ -242,35 +242,23 @@ main() {
             kubectl patch sc "$sc" -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class":"false"}}}' || true
         fi
     done
-    print_success "gp3 StorageClass ensured as default"
 
-    # Apply NGINX ConfigMap used by frontend
-    print_status "Applying frontend NGINX ConfigMap..."
-    kubectl apply -f infrastructure/k8s/frontend-nginx-configmap.yaml
-    print_success "Frontend NGINX ConfigMap applied"
-
-    # (Re)create ChromaDB PVC/Deployment with persistent volume
-    print_status "Preparing ChromaDB persistent volume..."
-    # If PVC exists and is Pending, delete to allow rebinding with default SC
+    # Prepare ChromaDB PVC (recreate if Pending) and wait for deployment
+    print_status "Deploying ChromaDB (PVC + Deployment + Service)..."
     PVC_PHASE=$(kubectl get pvc chromadb-pvc -n sih-solvers-compass -o jsonpath='{.status.phase}' 2>/dev/null || echo "")
-    if [ "$PVC_PHASE" = "Pending" ] || [ -z "$PVC_PHASE" ]; then
-        if kubectl get pvc chromadb-pvc -n sih-solvers-compass >/dev/null 2>&1; then
-            print_status "Deleting existing chromadb-pvc (phase: ${PVC_PHASE:-Unknown}) to rebind with default SC..."
-            kubectl delete pvc chromadb-pvc -n sih-solvers-compass --wait=true || true
-        fi
+    if [ "$PVC_PHASE" = "Pending" ]; then
+        print_status "Deleting Pending chromadb-pvc to rebind with default StorageClass..."
+        kubectl delete pvc chromadb-pvc -n sih-solvers-compass --wait=true || true
     fi
-    print_status "Applying ChromaDB manifests..."
     kubectl apply -f infrastructure/k8s/chromadb-optimal.yaml
-    # Wait for ChromaDB to become ready
-    print_status "Waiting for ChromaDB deployment to be available..."
+    print_status "Waiting for ChromaDB to be available..."
     kubectl wait --for=condition=available --timeout=300s deployment/chromadb -n sih-solvers-compass
-    print_success "ChromaDB is ready"
 
-    # Deploy backend and frontend (backend points to external ChromaDB)
+    # Deploy backend and frontend
     print_status "Deploying backend and frontend with GHCR images..."
     kubectl apply -f infrastructure/k8s/backend-fixed.yaml
     kubectl apply -f infrastructure/k8s/frontend-fixed.yaml
-    print_success "Backend and Frontend manifests applied"
+    print_success "Applications deployed"
     
     # Wait for deployments to be ready
     print_status "Waiting for deployments to be ready..."

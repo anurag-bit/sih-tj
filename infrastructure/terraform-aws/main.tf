@@ -133,6 +133,55 @@ resource "aws_eks_cluster" "main" {
     aws_iam_role_policy_attachment.eks_cluster_policy,
   ]
 }
+  # EKS IAM OIDC Provider (IRSA) - enables service account roles
+  data "tls_certificate" "oidc_thumbprint" {
+    # Use the issuer from the EKS cluster resource to avoid an extra data source
+    url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+  }
+
+  resource "aws_iam_openid_connect_provider" "eks" {
+    url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
+    client_id_list  = ["sts.amazonaws.com"]
+    thumbprint_list = [data.tls_certificate.oidc_thumbprint.certificates[0].sha1_fingerprint]
+
+    depends_on = [aws_eks_cluster.main]
+  }
+
+  # IRSA role for EBS CSI controller service account
+  data "aws_iam_policy" "ebs_csi_controller" {
+    arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  }
+
+  resource "aws_iam_role" "ebs_csi_irsa_role" {
+    name = "sih-ebs-csi-controller-irsa"
+
+    assume_role_policy = jsonencode({
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow",
+          Principal = {
+            Federated = aws_iam_openid_connect_provider.eks.arn
+          },
+          Action = "sts:AssumeRoleWithWebIdentity",
+          Condition = {
+            StringEquals = {
+              "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:aud" = "sts.amazonaws.com",
+              "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+            }
+          }
+        }
+      ]
+    })
+
+    depends_on = [aws_iam_openid_connect_provider.eks]
+  }
+
+  resource "aws_iam_role_policy_attachment" "ebs_csi_attach" {
+    role       = aws_iam_role.ebs_csi_irsa_role.name
+    policy_arn = data.aws_iam_policy.ebs_csi_controller.arn
+  }
+
 
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
@@ -155,16 +204,18 @@ resource "aws_eks_node_group" "main" {
   ]
 }
 
-# Enable AWS EBS CSI Driver as an EKS managed add-on
+# EKS managed add-on for AWS EBS CSI Driver (handles IRSA/IAM for provisioning EBS volumes)
 resource "aws_eks_addon" "ebs_csi" {
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "aws-ebs-csi-driver"
+  service_account_role_arn = aws_iam_role.ebs_csi_irsa_role.arn
 
-  # Let AWS choose a compatible version; resolve conflicts automatically
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
   depends_on = [
     aws_eks_cluster.main,
+    aws_iam_openid_connect_provider.eks,
+  aws_iam_role_policy_attachment.ebs_csi_attach,
   ]
 }

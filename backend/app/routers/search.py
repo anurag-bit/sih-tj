@@ -10,6 +10,7 @@ router = APIRouter(prefix="/search", tags=["search"])
 
 
 @router.post("/", response_model=List[SearchResult])
+@router.post("", response_model=List[SearchResult])  # accept missing trailing slash too
 async def semantic_search(query: SearchQuery) -> List[SearchResult]:
     """
     Performs semantic search using sentence transformers.

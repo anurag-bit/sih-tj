@@ -37,9 +37,8 @@ spec:
               name: sih-secrets
               key: github-token
               optional: true
-        # Point backend to external ChromaDB service
         - name: CHROMA_HOST
-          value: "chromadb"
+          value: "chromadb"  # Fixed service name
         - name: CHROMA_PORT
           value: "8000"
         - name: ENVIRONMENT
