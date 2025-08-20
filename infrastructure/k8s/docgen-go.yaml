@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docgen-go
+  namespace: sih-solvers-compass
+  labels:
+    app: docgen-go
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: docgen-go
+  template:
+    metadata:
+      labels:
+        app: docgen-go
+    spec:
+      containers:
+        - name: docgen-go
+          image: ghcr.io/anurag-bit/docgen-go:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sih-secrets
+                  key: openrouter-api-key
+            - name: HTTP_REFERER
+              value: "https://sih.anurag.dev"
+            - name: X_TITLE
+              value: "SIH Solver's Compass"
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp/docgen
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docgen-go
+  namespace: sih-solvers-compass
+  labels:
+    app: docgen-go
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: docgen-go

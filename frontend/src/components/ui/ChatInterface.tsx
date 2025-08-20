@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PaperAirplaneIcon, SparklesIcon, UserIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, SparklesIcon, UserIcon, ChatBubbleLeftIcon, DocumentTextIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import ErrorMessage from './ErrorMessage';
 import LoadingSpinner from './LoadingSpinner';
 import ModelSelector from './ModelSelector';
+import DocumentsPanel from './DocumentsPanel';
+import { docgenApi } from '../../services/docgen';
+import { SummaryResponse, PlanResponse, DesignResponse, FullResponse } from '../../schemas/docgen';
+
+type GeneratedDoc = SummaryResponse | PlanResponse | DesignResponse | FullResponse;
+type DocGenScope = "summary" | "plan" | "design" | "full";
 
 interface Message {
   id: string;
@@ -33,6 +39,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
   const [availableModels, setAvailableModels] = useState<ChatModel[]>([]);
   const [selectedModel, setSelectedModel] = useState<ChatModel | null>(null);
   const [modelsLoading, setModelsLoading] = useState(true);
+  const [isDocGenEnabled, setIsDocGenEnabled] = useState(false);
+  const [docGenScope, setDocGenScope] = useState<DocGenScope>('summary');
+  const [generatedDoc, setGeneratedDoc] = useState<GeneratedDoc | null>(null);
+  const [isDocGenLoading, setIsDocGenLoading] = useState(false);
+  const [docGenError, setDocGenError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -82,8 +93,53 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
   };
 
   const sendMessage = async (question: string) => {
-    if (!question.trim() || isLoading) return;
+    if (!question.trim() || isLoading || isDocGenLoading) return;
 
+    if (isDocGenEnabled) {
+      handleDocGen(question);
+    } else {
+      handleChat(question);
+    }
+  };
+
+  const handleDocGen = async (user_prompt: string) => {
+    setIsDocGenLoading(true);
+    setDocGenError(null);
+    setGeneratedDoc(null);
+
+    const payload = {
+      title: "User-initiated Generation",
+      description: problemContext,
+      user_prompt: user_prompt,
+      model: selectedModel?.id,
+    };
+
+    let result;
+    switch (docGenScope) {
+      case 'summary':
+        result = await docgenApi.generateSummary(payload);
+        break;
+      case 'plan':
+        result = await docgenApi.generatePlan(payload);
+        break;
+      case 'design':
+        result = await docgenApi.generateDesign(payload);
+        break;
+      case 'full':
+        result = await docgenApi.generateFull(payload);
+        break;
+    }
+
+    if (result.success) {
+      setGeneratedDoc(result.data);
+    } else {
+      setDocGenError(result.error);
+    }
+
+    setIsDocGenLoading(false);
+  };
+
+  const handleChat = async (question: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
@@ -104,15 +160,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
       timestamp: new Date(),
       isStreaming: true
     };
-
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
-  const response = await fetch('/api/chat/stream', {
+      const response = await fetch('/api/chat/stream', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           problem_id: problemId,
           problem_context: problemContext,
@@ -121,80 +174,42 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Chat request failed: ${response.statusText}`);
-      }
+      if (!response.ok) throw new Error(`Chat request failed: ${response.statusText}`);
 
       const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body reader available');
-      }
+      if (!reader) throw new Error('No response body reader available');
 
       let accumulatedContent = '';
-
+      const decoder = new TextDecoder();
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = new TextDecoder().decode(value);
+        const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             try {
               const data = JSON.parse(line.slice(6));
-              
-              if (data.error) {
-                throw new Error(data.error);
-              }
-              
+              if (data.error) throw new Error(data.error);
               if (data.done) {
-                setMessages(prev => prev.map(msg => 
-                  msg.id === assistantMessageId 
-                    ? { ...msg, isStreaming: false }
-                    : msg
-                ));
-                break;
+                setMessages(prev => prev.map(msg => msg.id === assistantMessageId ? { ...msg, isStreaming: false } : msg));
+                return;
               }
-              
               if (data.chunk) {
                 accumulatedContent += data.chunk;
-                setMessages(prev => prev.map(msg => 
-                  msg.id === assistantMessageId 
-                    ? { ...msg, content: accumulatedContent }
-                    : msg
-                ));
+                setMessages(prev => prev.map(msg => msg.id === assistantMessageId ? { ...msg, content: accumulatedContent } : msg));
               }
-            } catch (parseError) {
-              console.error('Error parsing streaming data:', parseError);
+            } catch (e) {
+              console.error('Error parsing streaming data:', e);
             }
           }
         }
       }
     } catch (err) {
-      // Fallback to non-streaming endpoint
-      try {
-        const fallback = await fetch('/api/chat/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            problem_id: problemId,
-            problem_context: problemContext,
-            user_question: question.trim(),
-            model: selectedModel?.id || null
-          })
-        });
-        if (!fallback.ok) throw new Error(`Fallback chat failed: ${fallback.statusText}`);
-        const data = await fallback.json();
-        setMessages(prev => prev.map(msg => 
-          msg.id === assistantMessageId 
-            ? { ...msg, content: data.response || '', isStreaming: false }
-            : msg
-        ));
-      } catch (fallbackErr) {
-        setError(fallbackErr instanceof Error ? fallbackErr.message : 'Failed to send message');
-        setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId));
-      }
+      setError(err instanceof Error ? err.message : 'Failed to send message');
+      setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId));
     } finally {
       setIsLoading(false);
     }
@@ -284,6 +299,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Document Panel */}
+      <DocumentsPanel doc={generatedDoc} isLoading={isDocGenLoading} error={docGenError} />
+
       {/* Input Area */}
       <div className="border-t border-gray-200 p-4 bg-white/80 backdrop-blur-sm">
         {/* Model Selection */}
@@ -297,6 +315,45 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
             onModelChange={setSelectedModel}
             loading={modelsLoading}
           />
+        </div>
+
+        {/* DocGen Controls */}
+        <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between">
+            <label htmlFor="docgen-toggle" className="flex items-center cursor-pointer">
+              <DocumentTextIcon className="w-5 h-5 mr-2 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700">Generate Document</span>
+            </label>
+            <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input
+                type="checkbox"
+                name="docgen-toggle"
+                id="docgen-toggle"
+                checked={isDocGenEnabled}
+                onChange={() => setIsDocGenEnabled(!isDocGenEnabled)}
+                className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+              />
+              <label htmlFor="docgen-toggle" className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+            </div>
+          </div>
+          {isDocGenEnabled && (
+            <div className="mt-3">
+              <label htmlFor="docgen-scope" className="block text-sm font-medium text-gray-700 mb-1">
+                Scope
+              </label>
+              <select
+                id="docgen-scope"
+                value={docGenScope}
+                onChange={(e) => setDocGenScope(e.target.value as DocGenScope)}
+                className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-sih-blue"
+              >
+                <option value="summary">Summary</option>
+                <option value="plan">Plan</option>
+                <option value="design">Design</option>
+                <option value="full">Full Document</option>
+              </select>
+            </div>
+          )}
         </div>
         
         <form onSubmit={handleSubmit} className="flex items-center gap-3">

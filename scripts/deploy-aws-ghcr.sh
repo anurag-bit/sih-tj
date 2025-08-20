@@ -296,6 +296,12 @@ EOF
     print_status "Waiting for ChromaDB to be available..."
     kubectl -n sih-solvers-compass rollout status deploy/chromadb --timeout=10m
 
+    # Deploy docgen-go service
+    print_status "Deploying docgen-go service..."
+    kubectl apply -f "$K8S_DIR/docgen-go.yaml"
+    print_status "Waiting for docgen-go to be available..."
+    kubectl -n sih-solvers-compass rollout status deploy/docgen-go --timeout=5m
+
     # Deploy backend and frontend
     print_status "Deploying backend and frontend with GHCR images..."
             # Apply frontend NGINX ConfigMap only if present AND non-empty to avoid kubectl 'no objects' error

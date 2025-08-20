@@ -1,0 +1,18 @@
+{
+  "id": "mermaid_component",
+  "description": "Generates a Mermaid component diagram.",
+  "template": "Based on the provided system description, generate a component diagram in Mermaid syntax. The diagram should show the main components of the system and their relationships. Respond ONLY with the Mermaid code block for the component diagram. Do not include any explanation or other text.",
+  "constraints": [
+    "Respond ONLY with valid Mermaid syntax.",
+    "Do not include the `graph` or `componentDiagram` keyword, just the body of the diagram.",
+    "Do not add any explanations or introductory text."
+  ],
+  "outputs": [
+    "diagram_code"
+  ],
+  "tags": [
+    "diagram",
+    "mermaid",
+    "component"
+  ]
+}

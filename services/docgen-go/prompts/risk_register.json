@@ -1,0 +1,17 @@
+{
+  "id": "risk_register",
+  "description": "Identifies potential risks and mitigation strategies.",
+  "template": "Based on the problem description and proposed solution, identify potential technical and project risks. For each risk, provide a brief description, assess its impact (High, Medium, Low), and suggest a mitigation strategy. Respond ONLY as a compact JSON object with the key `risks_md`, containing the analysis in a Markdown table with columns 'Risk Description', 'Impact', and 'Mitigation Strategy'.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `risks_md` value must be valid Markdown.",
+    "Use a Markdown table for the output."
+  ],
+  "outputs": [
+    "risks_md"
+  ],
+  "tags": [
+    "planning",
+    "risk"
+  ]
+}

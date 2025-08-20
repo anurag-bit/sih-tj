@@ -1,0 +1,17 @@
+{
+  "id": "problem_breakdown",
+  "description": "Breaks down the problem into smaller, manageable parts.",
+  "template": "Analyze the provided problem statement and break it down into smaller, logical components or sub-problems. This breakdown should help in understanding the scope and complexity. Respond ONLY as a compact JSON object with the key `breakdown_md`, containing the analysis in a nested Markdown list.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `breakdown_md` value must be valid Markdown.",
+    "Use a nested list to show the hierarchy of the breakdown."
+  ],
+  "outputs": [
+    "breakdown_md"
+  ],
+  "tags": [
+    "planning",
+    "analysis"
+  ]
+}

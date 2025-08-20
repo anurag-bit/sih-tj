@@ -1,0 +1,17 @@
+{
+  "id": "constraints_alignment",
+  "description": "Aligns the solution with the given constraints.",
+  "template": "Review the problem description and the provided constraints. Explain how the proposed solution will align with each constraint. If a constraint cannot be met, explain why and suggest an alternative. Respond ONLY as a compact JSON object with the key `alignment_md`, containing the analysis in a Markdown table with columns 'Constraint' and 'Alignment Strategy'.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `alignment_md` value must be valid Markdown.",
+    "Use a Markdown table for the output."
+  ],
+  "outputs": [
+    "alignment_md"
+  ],
+  "tags": [
+    "planning",
+    "analysis"
+  ]
+}

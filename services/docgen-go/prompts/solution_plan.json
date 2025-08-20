@@ -1,0 +1,16 @@
+{
+  "id": "solution_plan",
+  "description": "Generates a step-by-step solution plan.",
+  "template": "Based on the following problem description, create a detailed, step-by-step plan to implement the solution. The plan should be broken down into clear phases (e.g., Phase 1: Research & Design, Phase 2: Development, Phase 3: Testing & Deployment). Each step should be actionable. Respond ONLY as a compact JSON object with the key `plan_md`, which should contain the plan in Markdown format.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `plan_md` value must be valid Markdown.",
+    "Use numbered lists for steps within phases."
+  ],
+  "outputs": [
+    "plan_md"
+  ],
+  "tags": [
+    "planning"
+  ]
+}

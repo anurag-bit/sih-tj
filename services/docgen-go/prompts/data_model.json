@@ -1,0 +1,17 @@
+{
+  "id": "data_model",
+  "description": "Defines the data model for the solution.",
+  "template": "Based on the problem description, define the logical data model for the solution. This should include the main entities, their attributes, and their relationships. You can use a format like a list of entities with their properties, or a more visual representation using mermaid-js class diagrams. Respond ONLY as a compact JSON object with the key `data_model_md`, containing the data model in Markdown format.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `data_model_md` value must be valid Markdown.",
+    "If using Mermaid, provide the code block."
+  ],
+  "outputs": [
+    "data_model_md"
+  ],
+  "tags": [
+    "design",
+    "data"
+  ]
+}

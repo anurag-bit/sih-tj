@@ -95,3 +95,12 @@
     background: #94a3b8;
   }
 }
+
+/* Custom toggle switch styles */
+.toggle-checkbox:checked {
+  right: 0;
+  border-color: #2563EB; /* sih-blue */
+}
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #2563EB; /* sih-blue */
+}

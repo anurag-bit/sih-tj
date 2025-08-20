@@ -1,0 +1,16 @@
+{
+  "id": "testing_strategy",
+  "description": "Outlines the testing strategy for the solution.",
+  "template": "Outline a comprehensive testing strategy for the proposed solution. The strategy should cover different levels of testing, such as unit tests, integration tests, end-to-end (E2E) tests, and user acceptance testing (UAT). Specify the tools and frameworks that could be used. Respond ONLY as a compact JSON object with the key `testing_md`, containing the strategy in Markdown format.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `testing_md` value must be valid Markdown.",
+    "Include sections for different testing levels."
+  ],
+  "outputs": [
+    "testing_md"
+  ],
+  "tags": [
+    "testing"
+  ]
+}

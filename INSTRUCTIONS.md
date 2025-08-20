@@ -98,6 +98,12 @@ App.tsx             # Main application component
 main.tsx            # React entry point
 ```
 
+### DocGen Service (`services/docgen-go/`)
+A new internal service written in Go for heavy-duty document generation.
+- **API**: Internal JSON-only API, consumed by the FastAPI backend.
+- **Features**: Generates various project documents, including diagrams (Mermaid/PlantUML).
+- **Storage**: Uses ephemeral storage (`emptyDir` in Kubernetes) for temporary artifacts.
+
 ## Development Guidelines
 
 ### Code Style & Patterns
