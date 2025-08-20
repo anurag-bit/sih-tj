@@ -24,7 +24,7 @@ type ExportRequestPayload = {
 
 type ApiResult<T> = { success: true; data: T } | { success: false; error: string };
 
-async function post<T>(endpoint: string, payload: object, schema: any): Promise<ApiResult<T>> {
+async function post<T>(endpoint: string, payload: object, schema: ZodType<T>): Promise<ApiResult<T>> {
   let lastError: string | null = null;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     const controller = new AbortController();
