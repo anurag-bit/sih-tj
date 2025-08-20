@@ -1,4 +1,5 @@
 import httpx
+import asyncio
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
@@ -17,6 +18,9 @@ class DocGenRequest(BaseModel):
     model: str | None = None
     context: Dict[str, Any] = {}
     user_prompt: str | None = None
+
+class FullDocGenRequest(DocGenRequest):
+    prompts: List[str] = []
 
 class SummaryResponse(BaseModel):
     summary_md: str
@@ -38,16 +42,16 @@ class DesignResponse(BaseModel):
 
 # A more comprehensive model for the full response
 class FullResponse(BaseModel):
-    summary_md: str
-    plan_md: str
-    design_md: str
-    diagrams: List[Diagram]
-    risks_md: str
-    acceptance_md: str
-    testing_md: str
-    api_md: str
-    data_md: str
-    capacity_md: str
+    summary_md: str | None = None
+    plan_md: str | None = None
+    design_md: str | None = None
+    diagrams: List[Diagram] = []
+    risks_md: str | None = None
+    acceptance_md: str | None = None
+    testing_md: str | None = None
+    api_md: str | None = None
+    data_model_md: str | None = None
+    capacity_md: str | None = None
 
 class ExportRequest(BaseModel):
     bundle: Dict[str, Any]
@@ -61,20 +65,32 @@ class ExportResponse(BaseModel):
 # --- Helper Function for Proxying ---
 
 async def _proxy_request(client: httpx.AsyncClient, method: str, url: str, json: dict = None):
-    try:
-        resp = await client.request(method, url, json=json, timeout=45.0)
-        resp.raise_for_status()
-        return resp.json()
-    except httpx.HTTPStatusError as e:
-        # Forward the status code and detail from the Go service if possible
-        detail = e.response.text
+    # Simple retry with backoff for transient errors
+    retries = 2
+    last_exc: Exception | None = None
+    for attempt in range(retries + 1):
         try:
-            detail = e.response.json()
-        except:
-            pass
-        raise HTTPException(status_code=e.response.status_code, detail=detail)
-    except httpx.RequestError as e:
-        raise HTTPException(status_code=503, detail=f"Docgen service unavailable: {e}")
+            resp = await client.request(method, url, json=json, timeout=45.0)
+            resp.raise_for_status()
+            return resp.json()
+        except httpx.HTTPStatusError as e:
+            # Do not retry on 4xx except 429
+            status = e.response.status_code
+            if status in (502, 503, 504, 429) and attempt < retries:
+                await asyncio.sleep(0.5 * (attempt + 1))
+                continue
+            detail = e.response.text
+            try:
+                detail = e.response.json()
+            except Exception:
+                pass
+            raise HTTPException(status_code=status, detail=detail)
+        except httpx.RequestError as e:
+            last_exc = e
+            if attempt < retries:
+                await asyncio.sleep(0.5 * (attempt + 1))
+                continue
+            raise HTTPException(status_code=503, detail=f"Docgen service unavailable: {e}")
 
 
 # --- API Endpoints ---
@@ -95,7 +111,7 @@ async def generate_design(request: DocGenRequest):
         return await _proxy_request(client, "POST", f"{DOCGEN_SERVICE_URL}/design", json=request.dict())
 
 @router.post("/full", response_model=FullResponse)
-async def generate_full(request: DocGenRequest):
+async def generate_full(request: FullDocGenRequest):
     async with httpx.AsyncClient() as client:
         return await _proxy_request(client, "POST", f"{DOCGEN_SERVICE_URL}/full", json=request.dict())
 

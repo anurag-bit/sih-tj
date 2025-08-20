@@ -63,13 +63,15 @@ func main() {
 		summaryHandler := handlers.NewSummaryHandler(orClient)
 		planHandler := handlers.NewPlanHandler(orClient)
 		designHandler := handlers.NewDesignHandler(orClient)
-		fullHandler := handlers.NewFullHandler()
+		fullHandler := handlers.NewFullHandler(orClient)
 		exportHandler := handlers.NewExportHandler(artifactStore)
 		filesHandler := handlers.NewFilesHandler(artifactStore)
 
+		// Mount individual generation endpoints
 		r.Mount("/summary", summaryHandler)
 		r.Mount("/plan", planHandler)
 		r.Mount("/design", designHandler)
+
 		r.Mount("/full", fullHandler)
 		r.Mount("/export", exportHandler)
 		r.Get("/files/{id}/{filename}", filesHandler.ServeHTTP)

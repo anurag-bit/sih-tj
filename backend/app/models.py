@@ -20,7 +20,7 @@ class ProblemStatement(BaseModel):
 
 class SearchQuery(BaseModel):
     """Search request model."""
-    query: str = Field(..., min_length=1, description="Natural language search query")
+    query: str = Field(..., description="Natural language search query")
     limit: int = Field(default=20, ge=1, le=100, description="Maximum number of results")
 
 
@@ -33,7 +33,8 @@ class SearchResult(BaseModel):
 class ChatRequest(BaseModel):
     """Chat request model."""
     problem_id: str = Field(..., description="Problem statement ID for context")
-    problem_context: str = Field(..., min_length=1, description="Full problem statement context")
+    problem_context: str = Field(..., description="Full problem statement context")
+    # user_question must be non-empty to satisfy validation expectations (empty -> 422)
     user_question: str = Field(..., min_length=1, description="User's question about the problem")
     model: Optional[str] = Field(default=None, description="Selected AI model to use for response")
 

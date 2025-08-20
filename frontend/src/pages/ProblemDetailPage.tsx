@@ -5,7 +5,6 @@ import {
   BuildingOfficeIcon, 
   TagIcon,
   ChatBubbleLeftRightIcon,
-  CodeBracketIcon,
   ScaleIcon
 } from '@heroicons/react/24/outline';
 import ChatInterface from '../components/ui/ChatInterface';
@@ -24,7 +23,13 @@ interface ProblemStatement {
   created_at?: string;
 }
 
-const DetailItem = ({ icon: Icon, label, value }) => (
+interface DetailItemProps {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: React.ReactNode;
+}
+
+const DetailItem: React.FC<DetailItemProps> = ({ icon: Icon, label, value }) => (
   <div className="flex items-center text-sm text-gray-600">
     <Icon className="w-5 h-5 mr-3 text-gray-400" />
     <span className="font-medium text-gray-700 mr-2">{label}:</span>

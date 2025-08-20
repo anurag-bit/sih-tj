@@ -5,17 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"services/docgen-go/openrouter"
-	"services/docgen-go/prompts"
 )
-
-// Diagram represents a single diagram in a design response.
-type Diagram struct {
-	ID       string `json:"id"`
-	Type     string `json:"type"`
-	Language string `json:"language"`
-	Title    string `json:"title,omitempty"`
-	Code     string `json:"code"`
-}
 
 // DesignResponse is the response for the /design endpoint.
 type DesignResponse struct {
@@ -39,46 +29,15 @@ func (h *DesignHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	p, err := prompts.GetPrompt("architecture_overview")
+	rawJSON, err := CallOpenRouter(r.Context(), w, h.orClient, "architecture_overview", &req)
 	if err != nil {
-		slog.Error("failed to get prompt", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	fullPrompt := p.Template + "\n\nProblem Title: " + req.Title + "\nProblem Description: " + req.Description
-
-	model := "openrouter/auto"
-	if req.Model != "" {
-		model = req.Model
-	}
-
-	orReq := openrouter.ChatRequest{
-		Model: model,
-		Messages: []openrouter.Message{
-			{Role: "system", Content: "You are a helpful assistant that generates documents based on user input."},
-			{Role: "user", Content: fullPrompt},
-		},
-		ResponseFormat: &openrouter.ResponseFormat{Type: "json_object"},
-	}
-
-	orResp, err := h.orClient.CreateChatCompletion(r.Context(), orReq)
-	if err != nil {
-		slog.Error("failed to create chat completion", "error", err)
-		http.Error(w, "Failed to generate design", http.StatusInternalServerError)
-		return
-	}
-
-	if len(orResp.Choices) == 0 {
-		slog.Error("no choices returned from OpenRouter")
-		http.Error(w, "Failed to generate design", http.StatusInternalServerError)
+		// Error is already handled in CallOpenRouter
 		return
 	}
 
 	var designResp DesignResponse
-	err = json.Unmarshal([]byte(orResp.Choices[0].Message.Content), &designResp)
-	if err != nil {
-		slog.Error("failed to unmarshal LLM response", "error", err, "response", orResp.Choices[0].Message.Content)
+	if err := json.Unmarshal(rawJSON, &designResp); err != nil {
+		slog.Error("failed to unmarshal LLM response", "error", err, "response", string(rawJSON))
 		http.Error(w, "Failed to parse LLM response", http.StatusInternalServerError)
 		return
 	}

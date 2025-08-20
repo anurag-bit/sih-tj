@@ -49,16 +49,11 @@ const CategoryChart: React.FC<CategoryChartProps> = ({ data, loading = false }) 
           <XAxis type="number" stroke="#9CA3AF" fontSize={12} />
           <YAxis
             type="category"
-            dataKey="fullCategory"
+            dataKey="category"
             stroke="#4B5563"
             fontSize={12}
             width={120}
-            tick={{
-              width: 110,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
+            tick={{ fontSize: 12 }}
           />
           <Tooltip
             cursor={{ fill: 'rgba(249, 115, 22, 0.1)' }}
@@ -71,7 +66,7 @@ const CategoryChart: React.FC<CategoryChartProps> = ({ data, loading = false }) 
             labelStyle={{ fontWeight: 'bold' }}
           />
           <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-            {chartData.map((entry, index) => (
+            {chartData.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Bar>

@@ -5,9 +5,16 @@ import OrganizationChart from '../components/ui/OrganizationChart';
 import WordCloud from '../components/ui/WordCloud';
 import ErrorMessage from '../components/ui/ErrorMessage';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import { ChartBarIcon, BuildingOfficeIcon, TagIcon, CubeIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, BuildingOfficeIcon, CubeIcon } from '@heroicons/react/24/outline';
 
-const StatCard = ({ title, value, icon: Icon, color }) => (
+interface StatCardProps {
+  title: string;
+  value: number;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, color }) => (
   <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200/80">
     <div className="flex items-center">
       <div className={`w-12 h-12 rounded-lg flex items-center justify-center bg-${color}-100 text-${color}-600`}>

@@ -45,6 +45,9 @@ async def semantic_search(query: SearchQuery) -> List[SearchResult]:
             status_code=500,
             detail=f"Search service error: {str(e)}"
         )
+    except HTTPException:
+        # Preserve explicit HTTPExceptions like 400 for empty queries
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,

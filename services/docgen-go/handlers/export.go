@@ -6,6 +6,9 @@ import (
 	"log/slog"
 	"net/http"
 	"services/docgen-go/artifact"
+	"strings"
+
+	"github.com/jung-kurt/gofpdf"
 )
 
 // ExportRequest is the request for the /export endpoint.
@@ -36,7 +39,6 @@ func (h *ExportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// 1. Create a new artifact bundle
 	art, err := h.store.CreateNew()
 	if err != nil {
 		slog.Error("failed to create artifact", "error", err)
@@ -44,19 +46,55 @@ func (h *ExportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2. Write files to the artifact directory
-	// In a real implementation, we would generate PDF/ZIP here.
-	// For now, we just write the markdown content from the bundle.
 	var filenames []string
-	for key, value := range req.Bundle {
-		if content, ok := value.(string); ok {
-			filename := fmt.Sprintf("%s.md", key)
-			if _, err := art.WriteFile(filename, []byte(content)); err != nil {
-				slog.Error("failed to write artifact file", "error", err, "filename", filename)
-				http.Error(w, "Failed to write artifact file", http.StatusInternalServerError)
-				return
+	if req.Format == "pdf" {
+		for key, value := range req.Bundle {
+			if content, ok := value.(string); ok {
+				filename := fmt.Sprintf("%s.pdf", key)
+				pdf := gofpdf.New("P", "mm", "A4", "")
+				pdf.AddPage()
+				pdf.SetFont("Arial", "", 12)
+
+				lines := strings.Split(content, "\n")
+				for _, line := range lines {
+					if strings.HasPrefix(line, "# ") {
+						pdf.SetFont("Arial", "B", 16)
+						pdf.Cell(40, 10, strings.TrimPrefix(line, "# "))
+						pdf.Ln(12)
+						pdf.SetFont("Arial", "", 12)
+					} else {
+						pdf.MultiCell(0, 10, line, "", "", false)
+						pdf.Ln(4)
+					}
+				}
+
+				path, err := h.store.GetArtifactPath(art.ID, filename)
+				if err != nil {
+					slog.Error("failed to get artifact path", "error", err)
+					http.Error(w, "Failed to create artifact", http.StatusInternalServerError)
+					return
+				}
+
+				if err := pdf.OutputFileAndClose(path); err != nil {
+					slog.Error("failed to write pdf file", "error", err)
+					http.Error(w, "Failed to write pdf file", http.StatusInternalServerError)
+					return
+				}
+				filenames = append(filenames, filename)
 			}
-			filenames = append(filenames, filename)
+		}
+	} else {
+		// For now, we just write the markdown content from the bundle.
+		for key, value := range req.Bundle {
+			if content, ok := value.(string); ok {
+				filename := fmt.Sprintf("%s.md", key)
+				if _, err := art.WriteFile(filename, []byte(content)); err != nil {
+					slog.Error("failed to write artifact file", "error", err, "filename", filename)
+					http.Error(w, "Failed to write artifact file", http.StatusInternalServerError)
+					return
+				}
+				filenames = append(filenames, filename)
+			}
 		}
 	}
 
