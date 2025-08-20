@@ -52,29 +52,27 @@ func (h *ExportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if content, ok := value.(string); ok {
 				filename := fmt.Sprintf("%s.pdf", key)
 				pdf := gofpdf.New("P", "mm", "A4", "")
+				pdf.SetMargins(15, 15, 15)
+				pdf.SetAutoPageBreak(true, 15)
 				pdf.AddPage()
-				pdf.SetFont("Arial", "", 12)
+				// Use a built-in core font to avoid missing font errors in minimal containers
+				pdf.SetFont("Helvetica", "", 12)
 
 				lines := strings.Split(content, "\n")
 				for _, line := range lines {
 					if strings.HasPrefix(line, "# ") {
-						pdf.SetFont("Arial", "B", 16)
+						pdf.SetFont("Helvetica", "B", 16)
 						pdf.Cell(40, 10, strings.TrimPrefix(line, "# "))
 						pdf.Ln(12)
-						pdf.SetFont("Arial", "", 12)
+						pdf.SetFont("Helvetica", "", 12)
 					} else {
 						pdf.MultiCell(0, 10, line, "", "", false)
 						pdf.Ln(4)
 					}
 				}
 
-				path, err := h.store.GetArtifactPath(art.ID, filename)
-				if err != nil {
-					slog.Error("failed to get artifact path", "error", err)
-					http.Error(w, "Failed to create artifact", http.StatusInternalServerError)
-					return
-				}
-
+				// Write PDF directly to the artifact path; the file doesn't exist yet, so don't check for it
+				path := art.GetFilePath(filename)
 				if err := pdf.OutputFileAndClose(path); err != nil {
 					slog.Error("failed to write pdf file", "error", err)
 					http.Error(w, "Failed to write pdf file", http.StatusInternalServerError)

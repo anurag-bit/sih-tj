@@ -22,7 +22,10 @@ const MermaidDiagram: React.FC<{ diagram: Diagram }> = ({ diagram }) => {
   const [svg, setSvg] = useState<string | null>(null);
 
   useEffect(() => {
-    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+    if (typeof window !== 'undefined') {
+      // Initialize Mermaid only in browser
+      mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+    }
     if (ref.current && diagram.code) {
       mermaid.render(`mermaid-${diagram.id}`, diagram.code)
         .then((result: any) => setSvg(result.svg))
@@ -116,7 +119,12 @@ const DocumentsPanel: React.FC<DocumentsPanelProps> = ({ doc, isLoading, error, 
             {isExporting ? <LoadingSpinner size="sm" /> : 'Export as PDF'}
           </button>
         </div>
-        {exportError && <ErrorMessage title="Export Failed" error={exportError} />}
+        {exportError && (
+          <div className="mt-3">
+            <ErrorMessage title="Export Failed" error={exportError} />
+            <p className="text-xs text-gray-500 mt-1">PDF export may be temporarily unavailable. You can still download a ZIP bundle of Markdown + diagrams.</p>
+          </div>
+        )}
         {downloadLinks && (
           <div className="mt-4">
             <h5 className="font-medium text-gray-800">Download Links:</h5>

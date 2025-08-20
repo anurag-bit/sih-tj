@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   CodeBracketIcon, 
-  Bars3Icon,
-  MagnifyingGlassIcon
+  Bars3Icon
 } from '@heroicons/react/24/outline';
 import GitHubModal from '../ui/GitHubModal';
 
@@ -27,13 +26,12 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               <Bars3Icon className="w-6 h-6" />
             </button>
             
-            <Link 
-              to="/" 
-              className="flex items-center space-x-2"
-            >
-              <div className="w-8 h-8 bg-sih-blue rounded-lg flex items-center justify-center flex-shrink-0">
-                <MagnifyingGlassIcon className="w-5 h-5 text-white" />
-              </div>
+            <Link to="/" className="flex items-center space-x-2">
+              <img
+                src="/favicon.svg"
+                alt="Solver's Compass"
+                className="w-8 h-8 rounded-lg flex-shrink-0"
+              />
               <h1 className="text-lg sm:text-xl font-bold text-gray-800">
                 Solver's Compass
               </h1>

@@ -4,9 +4,9 @@ export const DiagramSchema = z.object({
   id: z.string(),
   type: z.string(),
   language: z.string(),
-  title: z.string().optional(),
+  title: z.string().nullish(),
   code: z.string(),
-  rendered_svg_url: z.string().optional(),
+  rendered_svg_url: z.string().nullish(),
 });
 
 export const SummaryResponseSchema = z.object({
@@ -19,7 +19,7 @@ export const PlanResponseSchema = z.object({
 
 export const DesignResponseSchema = z.object({
   design_md: z.string(),
-  diagrams: z.array(DiagramSchema),
+  diagrams: z.array(DiagramSchema).optional().default([]),
 });
 
 export const FullResponseSchema = z.object({
