@@ -1,0 +1,19 @@
+{
+  "id": "architecture_overview",
+  "description": "Generates a high-level architecture overview and a component diagram.",
+  "template": "Based on the following problem description, provide a high-level architecture overview for the proposed solution. The response must be a compact JSON object with two keys: `design_md` and `diagrams`. `design_md` should contain a Markdown description of the architecture. `diagrams` should be an array containing a single object representing a Mermaid component diagram. The diagram object must have the keys `id`, `type` ('component'), `language` ('mermaid'), and `code` (the Mermaid diagram code).",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "`design_md` must be valid Markdown.",
+    "`diagrams` array must contain one valid Mermaid component diagram object."
+  ],
+  "outputs": [
+    "design_md",
+    "diagrams"
+  ],
+  "tags": [
+    "design",
+    "architecture",
+    "diagram"
+  ]
+}

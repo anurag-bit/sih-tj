@@ -1,0 +1,17 @@
+{
+  "id": "tradeoffs_and_alternatives",
+  "description": "Discusses tradeoffs and alternative solutions.",
+  "template": "Based on the proposed solution, discuss the key tradeoffs that were made (e.g., performance vs. cost, simplicity vs. feature-richness). Also, briefly describe one or two alternative solutions or technologies that were considered and explain why they were not chosen. Respond ONLY as a compact JSON object with the key `tradeoffs_md`, containing the discussion in Markdown format.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `tradeoffs_md` value must be valid Markdown.",
+    "Use separate sections for 'Tradeoffs' and 'Alternatives Considered'."
+  ],
+  "outputs": [
+    "tradeoffs_md"
+  ],
+  "tags": [
+    "design",
+    "architecture"
+  ]
+}

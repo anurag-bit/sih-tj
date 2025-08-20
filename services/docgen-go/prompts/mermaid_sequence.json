@@ -1,0 +1,18 @@
+{
+  "id": "mermaid_sequence",
+  "description": "Generates a Mermaid sequence diagram.",
+  "template": "Based on the provided user flow or process description, generate a sequence diagram in Mermaid syntax. The diagram should illustrate the interactions between different components or actors over time. Respond ONLY with the Mermaid code block for the sequence diagram. Do not include any explanation or other text.",
+  "constraints": [
+    "Respond ONLY with valid Mermaid syntax.",
+    "Do not include the `sequenceDiagram` keyword, just the body of the diagram.",
+    "Do not add any explanations or introductory text."
+  ],
+  "outputs": [
+    "diagram_code"
+  ],
+  "tags": [
+    "diagram",
+    "mermaid",
+    "sequence"
+  ]
+}

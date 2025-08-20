@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from .config import settings
 from .middleware import ErrorHandlingMiddleware, LoggingMiddleware
 from .models import HealthCheck, ErrorResponse
-from .routers import search, github, chat, dashboard
+from .routers import search, github, chat, dashboard, docgen
 
 # Create FastAPI application instance
 app = FastAPI(
@@ -36,6 +36,7 @@ app.include_router(search.router, prefix="/api")
 app.include_router(github.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
+app.include_router(docgen.router, prefix="/api")
 
 
 @app.get("/", response_model=dict)

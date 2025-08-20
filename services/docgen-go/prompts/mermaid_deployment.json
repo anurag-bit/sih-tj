@@ -1,0 +1,18 @@
+{
+  "id": "mermaid_deployment",
+  "description": "Generates a Mermaid deployment diagram.",
+  "template": "Based on the provided architecture description, generate a deployment diagram in Mermaid syntax. The diagram should show how the software components are deployed to the physical or virtual infrastructure. Respond ONLY with the Mermaid code block for the deployment diagram. Do not include any explanation or other text.",
+  "constraints": [
+    "Respond ONLY with valid Mermaid syntax.",
+    "Do not include the `deploymentDiagram` keyword, just the body of the diagram.",
+    "Do not add any explanations or introductory text."
+  ],
+  "outputs": [
+    "diagram_code"
+  ],
+  "tags": [
+    "diagram",
+    "mermaid",
+    "deployment"
+  ]
+}

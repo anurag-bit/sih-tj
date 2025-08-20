@@ -1,0 +1,18 @@
+{
+  "id": "exec_summary",
+  "description": "Generates an executive summary for decision-makers.",
+  "template": "Based on the following problem description, generate a concise executive summary suitable for a non-technical audience. The summary should highlight the core problem, the proposed solution's key benefits, and the expected business impact. Respond ONLY as a compact JSON object with the key `summary_md`, which should contain the summary in Markdown format.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `summary_md` value must be valid Markdown.",
+    "The summary should be no more than 400 words.",
+    "The tone should be professional and persuasive."
+  ],
+  "outputs": [
+    "summary_md"
+  ],
+  "tags": [
+    "summary",
+    "planning"
+  ]
+}

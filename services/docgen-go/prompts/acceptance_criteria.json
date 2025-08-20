@@ -1,0 +1,17 @@
+{
+  "id": "acceptance_criteria",
+  "description": "Defines acceptance criteria for the solution.",
+  "template": "Define a set of clear and testable acceptance criteria for the proposed solution. These criteria should be specific, measurable, achievable, relevant, and time-bound (SMART), if possible. They will be used to validate that the solution meets the requirements. Respond ONLY as a compact JSON object with the key `acceptance_md`, containing the criteria as a Markdown checklist.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `acceptance_md` value must be valid Markdown.",
+    "Use a Markdown checklist for the criteria."
+  ],
+  "outputs": [
+    "acceptance_md"
+  ],
+  "tags": [
+    "planning",
+    "testing"
+  ]
+}

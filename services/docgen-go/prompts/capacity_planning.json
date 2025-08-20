@@ -1,0 +1,17 @@
+{
+  "id": "capacity_planning",
+  "description": "Provides capacity planning estimates.",
+  "template": "Based on the problem description and a hypothetical user base (e.g., 10,000 users), provide a high-level capacity planning estimate. This should include considerations for CPU, memory, storage, and network bandwidth for the main application components. Respond ONLY as a compact JSON object with the key `capacity_md`, containing the estimates in a Markdown table.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `capacity_md` value must be valid Markdown.",
+    "Use a Markdown table with columns 'Component', 'CPU', 'Memory', 'Storage', 'Network'."
+  ],
+  "outputs": [
+    "capacity_md"
+  ],
+  "tags": [
+    "planning",
+    "ops"
+  ]
+}

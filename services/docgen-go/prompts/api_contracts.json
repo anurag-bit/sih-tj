@@ -1,0 +1,17 @@
+{
+  "id": "api_contracts",
+  "description": "Defines API contracts and data models.",
+  "template": "Based on the problem description, define the necessary API endpoints and their data models (request and response). The output should be a clear, developer-friendly description of the API contract. You can use OpenAPI-like syntax or just a clear Markdown format. Respond ONLY as a compact JSON object with the key `api_md`, containing the API contracts in Markdown format.",
+  "constraints": [
+    "Respond strictly in JSON format.",
+    "The `api_md` value must be valid Markdown.",
+    "Use code blocks for JSON examples of request/response bodies."
+  ],
+  "outputs": [
+    "api_md"
+  ],
+  "tags": [
+    "design",
+    "api"
+  ]
+}
