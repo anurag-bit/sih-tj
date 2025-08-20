@@ -91,7 +91,12 @@ func (h *FullHandler) generateCombined(ctx context.Context, w http.ResponseWrite
 				}
 				// Assuming rawJSON contains just the Mermaid code string
 				// Trim surrounding quotes/backticks/whitespace from the returned code
-				code := strings.Trim(string(rawJSON), " `\"") // Remove quotes/backticks and trim whitespace
+				// Assuming rawJSON contains a JSON-encoded string with the Mermaid code
+				var code string
+				if err := json.Unmarshal(rawJSON, &code); err != nil {
+					// If unmarshalling fails, fallback to using the raw string (as a last resort)
+					code = string(rawJSON)
+				}
 				mu.Lock()
 				fullResp.Diagrams = append(fullResp.Diagrams, Diagram{
 					ID:       pID,
