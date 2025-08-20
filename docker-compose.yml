@@ -63,6 +63,24 @@ services:
       retries: 5
       start_period: 30s
 
+  # Docgen-Go service (internal document generation engine)
+  docgen-go:
+    build:
+      context: ./services/docgen-go
+      dockerfile: Dockerfile
+    # Expose for local health checks; backend talks to docgen-go over the Docker network
+    ports:
+      - "8082:8080"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - HTTP_REFERER=${HTTP_REFERER:-http://localhost}
+      - X_TITLE=${X_TITLE:-SIH Solver's Compass Docgen}
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - sih-network
+
 # Named volumes for data persistence
 volumes:
   chroma-data:

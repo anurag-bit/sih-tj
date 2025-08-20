@@ -74,10 +74,10 @@ class ChatService:
                 "name": "Claude 3.5 Sonnet",
                 "description": "Anthropic's latest and most capable model",
                 "provider": "Anthropic"
-            }
+            },
         ]
-    # Set the default model id (first in fallback list)
-    self.default_model_id = self.default_models[0]
+        # Set the default model id (first in fallback list)
+        self.default_model_id = self.default_models[0]
 
     def _validate_context(self, problem_context: str) -> bool:
         """

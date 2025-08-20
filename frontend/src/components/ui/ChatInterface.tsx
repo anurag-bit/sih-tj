@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PaperAirplaneIcon, SparklesIcon, UserIcon, ChatBubbleLeftIcon, DocumentTextIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, SparklesIcon, UserIcon, ChatBubbleLeftIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import ErrorMessage from './ErrorMessage';
 import LoadingSpinner from './LoadingSpinner';
 import ModelSelector from './ModelSelector';
@@ -42,6 +42,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
   const [isDocGenEnabled, setIsDocGenEnabled] = useState(false);
   const [docGenScope, setDocGenScope] = useState<DocGenScope>('summary');
   const [generatedDoc, setGeneratedDoc] = useState<GeneratedDoc | null>(null);
+  const [includeDiagrams, setIncludeDiagrams] = useState<boolean>(true);
   const [isDocGenLoading, setIsDocGenLoading] = useState(false);
   const [docGenError, setDocGenError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -107,12 +108,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
     setDocGenError(null);
     setGeneratedDoc(null);
 
-    const payload = {
+    const payload: any = {
       title: "User-initiated Generation",
       description: problemContext,
       user_prompt: user_prompt,
       model: selectedModel?.id,
     };
+    if (docGenScope === 'full') {
+      payload.prompts = ['exec_summary', 'solution_plan', 'system_design'];
+    }
 
     let result;
     switch (docGenScope) {
@@ -162,7 +166,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
     };
     setMessages(prev => [...prev, assistantMessage]);
 
+    // Abort if the stream takes too long
+    let timeoutId: number | undefined;
+    const controller = new AbortController();
     try {
+      timeoutId = window.setTimeout(() => controller.abort(), 60000);
+
       const response = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -172,6 +181,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
           user_question: question.trim(),
           model: selectedModel?.id || null
         }),
+        signal: controller.signal,
       });
 
       if (!response.ok) throw new Error(`Chat request failed: ${response.statusText}`);
@@ -179,38 +189,23 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
       const reader = response.body?.getReader();
       if (!reader) throw new Error('No response body reader available');
 
+      // Backend streams plain text chunks (no SSE). Append directly.
       let accumulatedContent = '';
       const decoder = new TextDecoder();
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              if (data.error) throw new Error(data.error);
-              if (data.done) {
-                setMessages(prev => prev.map(msg => msg.id === assistantMessageId ? { ...msg, isStreaming: false } : msg));
-                return;
-              }
-              if (data.chunk) {
-                accumulatedContent += data.chunk;
-                setMessages(prev => prev.map(msg => msg.id === assistantMessageId ? { ...msg, content: accumulatedContent } : msg));
-              }
-            } catch (e) {
-              console.error('Error parsing streaming data:', e);
-            }
-          }
-        }
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedContent += chunk;
+        setMessages(prev => prev.map(msg => msg.id === assistantMessageId ? { ...msg, content: accumulatedContent } : msg));
       }
+      // Mark stream complete
+      setMessages(prev => prev.map(msg => msg.id === assistantMessageId ? { ...msg, isStreaming: false } : msg));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send message');
       setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId));
     } finally {
+      if (typeof timeoutId !== 'undefined') window.clearTimeout(timeoutId);
       setIsLoading(false);
     }
   };
@@ -300,7 +295,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
       </div>
 
       {/* Document Panel */}
-      <DocumentsPanel doc={generatedDoc} isLoading={isDocGenLoading} error={docGenError} />
+  <DocumentsPanel doc={generatedDoc} isLoading={isDocGenLoading} error={docGenError} showDiagrams={includeDiagrams} />
 
       {/* Input Area */}
       <div className="border-t border-gray-200 p-4 bg-white/80 backdrop-blur-sm">
@@ -352,6 +347,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
                 <option value="design">Design</option>
                 <option value="full">Full Document</option>
               </select>
+              <div className="mt-3 flex items-center gap-2">
+                <input id="docgen-diagrams" type="checkbox" checked={includeDiagrams} onChange={(e) => setIncludeDiagrams(e.target.checked)} />
+                <label htmlFor="docgen-diagrams" className="text-sm text-gray-700">Render diagrams (if provided)</label>
+              </div>
             </div>
           )}
         </div>

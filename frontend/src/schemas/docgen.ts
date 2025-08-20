@@ -23,16 +23,17 @@ export const DesignResponseSchema = z.object({
 });
 
 export const FullResponseSchema = z.object({
-  summary_md: z.string(),
-  plan_md: z.string(),
-  design_md: z.string(),
-  diagrams: z.array(DiagramSchema),
-  risks_md: z.string(),
-  acceptance_md: z.string(),
-  testing_md: z.string(),
-  api_md: z.string(),
-  data_md: z.string(),
-  capacity_md: z.string(),
+  summary_md: z.string().optional(),
+  plan_md: z.string().optional(),
+  design_md: z.string().optional(),
+  diagrams: z.array(DiagramSchema).optional().default([]),
+  risks_md: z.string().optional(),
+  acceptance_md: z.string().optional(),
+  testing_md: z.string().optional(),
+  api_md: z.string().optional(),
+  data_md: z.string().optional(),
+  data_model_md: z.string().optional(),
+  capacity_md: z.string().optional(),
 });
 
 export const ExportResponseSchema = z.object({

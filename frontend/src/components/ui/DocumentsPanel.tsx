@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+// @ts-ignore - types may not be present
 import mermaid from 'mermaid';
 import { docgenApi } from '../../services/docgen';
 import { SummaryResponse, PlanResponse, DesignResponse, FullResponse, Diagram } from '../../schemas/docgen';
@@ -13,6 +14,7 @@ interface DocumentsPanelProps {
   doc: GeneratedDoc;
   isLoading: boolean;
   error: string | null;
+  showDiagrams?: boolean;
 }
 
 const MermaidDiagram: React.FC<{ diagram: Diagram }> = ({ diagram }) => {
@@ -23,8 +25,8 @@ const MermaidDiagram: React.FC<{ diagram: Diagram }> = ({ diagram }) => {
     mermaid.initialize({ startOnLoad: false, theme: 'dark' });
     if (ref.current && diagram.code) {
       mermaid.render(`mermaid-${diagram.id}`, diagram.code)
-        .then(result => setSvg(result.svg))
-        .catch(err => console.error('Mermaid render error:', err));
+        .then((result: any) => setSvg(result.svg))
+        .catch((err: any) => console.error('Mermaid render error:', err));
     }
   }, [diagram]);
 
@@ -39,7 +41,7 @@ const MermaidDiagram: React.FC<{ diagram: Diagram }> = ({ diagram }) => {
   );
 };
 
-const DocumentsPanel: React.FC<DocumentsPanelProps> = ({ doc, isLoading, error }) => {
+const DocumentsPanel: React.FC<DocumentsPanelProps> = ({ doc, isLoading, error, showDiagrams = true }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [downloadLinks, setDownloadLinks] = useState<{ id: string, files: string[] } | null>(null);
@@ -101,7 +103,8 @@ const DocumentsPanel: React.FC<DocumentsPanelProps> = ({ doc, isLoading, error }
         </ReactMarkdown>
       </div>
 
-      {getDiagrams().map(diag => <MermaidDiagram key={diag.id} diagram={diag} />)}
+  {/* Diagrams will be rendered if present; UI toggle exists in ChatInterface */}
+  {showDiagrams && getDiagrams().map(diag => <MermaidDiagram key={diag.id} diagram={diag} />)}
 
       <div className="mt-6">
         <h4 className="font-medium text-gray-800 mb-2">Export</h4>

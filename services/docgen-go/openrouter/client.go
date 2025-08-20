@@ -23,6 +23,7 @@ var (
 var (
 	ErrUnauthorized = errors.New("unauthorized: check your OpenRouter API key")
 	ErrForbidden    = errors.New("forbidden: you do not have permission to access this resource")
+	ErrRateLimited  = errors.New("rate limited: too many requests")
 )
 
 // Client is a client for the OpenRouter API.
@@ -50,8 +51,8 @@ func NewClient() (*Client, error) {
 
 // ChatRequest represents a request to the OpenRouter chat completions API.
 type ChatRequest struct {
-	Model        string        `json:"model"`
-	Messages     []Message     `json:"messages"`
+	Model          string          `json:"model"`
+	Messages       []Message       `json:"messages"`
 	ResponseFormat *ResponseFormat `json:"response_format,omitempty"`
 }
 
@@ -143,6 +144,10 @@ func (c *Client) handleError(resp *http.Response) error {
 		return ErrUnauthorized
 	case http.StatusForbidden:
 		return ErrForbidden
+	case http.StatusTooManyRequests:
+		return ErrRateLimited
+	case http.StatusInternalServerError:
+		return fmt.Errorf("internal server error: %s", resp.Status)
 	default:
 		return fmt.Errorf("received non-2xx status code: %d", resp.StatusCode)
 	}

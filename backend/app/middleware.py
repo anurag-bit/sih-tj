@@ -40,9 +40,14 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
                 timestamp=datetime.now()
             )
             
+            content = error_response.model_dump()
+            # Convert non-serializable fields (e.g., datetime) to string
+            if isinstance(content.get("timestamp"), datetime):
+                content["timestamp"] = content["timestamp"].isoformat()
+
             return JSONResponse(
                 status_code=500,
-                content=error_response.model_dump()
+                content=content
             )
 
 

@@ -75,30 +75,23 @@ async def chat_stream(chat_request: ChatRequest) -> StreamingResponse:
             )
         
         async def generate_stream():
-            """Generator function for streaming response."""
+            """Generator function for streaming response (plain text chunks)."""
             try:
                 async for chunk in chat_service.generate_streaming_response(
                     problem_context=chat_request.problem_context,
                     user_question=chat_request.user_question,
                     model=chat_request.model
                 ):
-                    # Format as Server-Sent Events
-                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
-                
-                # Send end-of-stream marker
-                yield f"data: {json.dumps({'done': True})}\n\n"
-                
+                    # Yield raw text chunks (no SSE framing) to match test expectations
+                    yield chunk
             except Exception as e:
                 logger.error(f"Streaming error: {str(e)}")
-                yield f"data: {json.dumps({'error': str(e)})}\n\n"
-        
+                # Propagate as plain text error message
+                yield f"Error: {str(e)}"
+
         return StreamingResponse(
             generate_stream(),
-            media_type="text/event-stream",
-            headers={
-                "Cache-Control": "no-cache",
-                "Connection": "keep-alive"
-            }
+            media_type="text/plain",
         )
         
     except HTTPException:
