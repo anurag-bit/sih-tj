@@ -71,29 +71,36 @@ const SearchPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
-          Search Problems
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-sih-orange/10 to-sih-blue/10 border border-sih-orange/20 mb-4">
+          <MagnifyingGlassIcon className="h-4 w-4 text-sih-blue mr-2" />
+          <span className="text-sm font-medium text-sih-blue">Problem Search</span>
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-sih-blue to-sih-orange bg-clip-text text-transparent sm:text-4xl">
+          Discover Your Perfect Challenge
         </h1>
-        <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-600">
-          Find problem statements that match your skills and interests.
+        <p className="mt-3 max-w-2xl mx-auto text-lg text-gray-600">
+          Find SIH problem statements that align with your skills, interests, and passion.
         </p>
       </div>
 
-      <div className="sticky top-4 bg-light-bg/80 backdrop-blur-lg z-10 py-4 mb-8 rounded-xl">
-        <div className="max-w-2xl mx-auto">
-          <SearchBar 
-            onSearch={handleSearch}
-            loading={isRetrying}
-            placeholder="Search by keywords, technologies, or domains..."
-          />
+      <div className="relative mb-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden backdrop-blur-lg">
+          <div className="p-6">
+            <SearchBar 
+              onSearch={handleSearch}
+              loading={isRetrying}
+              placeholder="Search by keywords, technologies, or domains..."
+            />
+          </div>
         </div>
       </div>
 
+      {/* Search Results */}
       <div>
         {isRetrying ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : lastError ? (
@@ -105,30 +112,41 @@ const SearchPage: React.FC = () => {
         ) : hasSearched ? (
           problems.length > 0 ? (
             <>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Results for "{query}"
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-sih-blue bg-clip-text text-transparent">
+                  Results for "{query}"
+                </h2>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="bg-sih-blue/10 text-sih-blue px-3 py-1 rounded-full">
+                    {problems.length} problems found
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {problems.map((problem) => (
                   <ProblemCard key={problem.id} problem={problem} />
                 ))}
               </div>
             </>
           ) : (
-            <div className="text-center py-16">
-              <MagnifyingGlassIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">No Results Found</h3>
-              <p className="text-gray-600">
-                Try adjusting your search terms or using different keywords.
+            <div className="text-center py-20">
+              <div className="bg-gradient-to-br from-sih-orange/10 to-sih-blue/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <MagnifyingGlassIcon className="w-8 h-8 text-sih-blue" />
+              </div>
+              <h3 className="text-2xl font-semibold bg-gradient-to-r from-gray-900 to-sih-blue bg-clip-text text-transparent mb-3">No Results Found</h3>
+              <p className="text-gray-600 max-w-md mx-auto">
+                Try adjusting your search terms, using different keywords, or exploring broader topics.
               </p>
             </div>
           )
         ) : (
-          <div className="text-center py-16">
-            <MagnifyingGlassIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-semibold text-gray-900 mb-2">Start Your Search</h3>
-            <p className="text-gray-600">
-              Enter your skills and interests above to find relevant SIH problems.
+          <div className="text-center py-20">
+            <div className="bg-gradient-to-br from-sih-orange/10 to-sih-blue/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <MagnifyingGlassIcon className="w-8 h-8 text-sih-orange" />
+            </div>
+            <h3 className="text-2xl font-semibold bg-gradient-to-r from-sih-orange to-sih-blue bg-clip-text text-transparent mb-3">Start Your Discovery</h3>
+            <p className="text-gray-600 max-w-md mx-auto">
+              Enter your skills and interests above to find relevant SIH problems that match your expertise.
             </p>
           </div>
         )}

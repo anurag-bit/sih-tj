@@ -1,3 +1,4 @@
+import { ZodType } from 'zod';
 import {
   SummaryResponseSchema, PlanResponseSchema, DesignResponseSchema, FullResponseSchema, ExportResponseSchema,
   SummaryResponse, PlanResponse, DesignResponse, FullResponse, ExportResponse

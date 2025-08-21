@@ -5,12 +5,14 @@ import SearchPage from './pages/SearchPage';
 import DashboardPage from './pages/DashboardPage';
 import ProblemsPage from './pages/ProblemsPage';
 import ProblemDetailPage from './pages/ProblemDetailPage';
+import DemoPage from './pages/DemoPage';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 
 function App() {
   return (
     <ErrorBoundary>
       <Routes>
+        <Route path="/demo" element={<DemoPage />} />
         <Route path="/" element={<AppLayout />}>
           <Route index element={<HomePage />} />
           <Route path="search" element={<SearchPage />} />

@@ -32,14 +32,17 @@ const HomePage: React.FC = () => {
   ];
 
   return (
-    <div className="bg-light-bg"> {/* Removed flex-1 overflow-y-auto */}
-      <div className="relative max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-32 px-4 sm:px-6">
+    <div className="bg-transparent min-h-screen">
+      <div className="relative max-w-6xl mx-auto pt-8 sm:pt-16 lg:pt-20 px-4 sm:px-6">
         <div className="text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900">
-            Find Your Perfect <span className="text-sih-orange">SIH</span> Problem
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-sih-orange/10 to-sih-blue/10 border border-sih-orange/20 mb-6">
+            <span className="text-sm font-medium text-sih-blue">Welcome to SIH Solver's Compass</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-gray-900 via-sih-blue to-sih-orange bg-clip-text text-transparent">
+            Find Your Perfect SIH Problem
           </h1>
-          <p className="mt-4 sm:mt-6 text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto">
-            AI-powered guidance to discover hackathon problems that match your skills and interests.
+          <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            AI-powered guidance to discover Smart India Hackathon problems that match your skills, interests, and passion.
           </p>
         </div>
 
@@ -52,17 +55,25 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24 lg:py-32">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((feature, index) => (
-            <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-shadow duration-300 border border-gray-200/50">
-              <div className={`flex items-center justify-center h-12 w-12 rounded-lg bg-sih-blue text-white mb-4`}>
+            <div key={index} className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/90 transition-all duration-300 border border-gray-200/30 hover:border-sih-blue/20 hover:shadow-lg group">
+              <div className={`flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-sih-orange to-sih-blue text-white mb-4 group-hover:scale-110 transition-transform duration-300`}>
                 <feature.icon className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-sih-blue transition-colors">{feature.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{feature.description}</p>
             </div>
           ))}
+        </div>
+        
+        <div className="mt-16 text-center">
+          <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-sih-blue/5 to-sih-orange/5 border border-sih-blue/10">
+            <span className="text-sm text-gray-600">
+              🚀 Empowering students to solve India's challenges through innovative technology
+            </span>
+          </div>
         </div>
       </div>
     </div>

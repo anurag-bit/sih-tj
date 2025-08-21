@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PaperAirplaneIcon, SparklesIcon, UserIcon, ChatBubbleLeftIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, UserIcon, ChatBubbleLeftIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import ErrorMessage from './ErrorMessage';
-import LoadingSpinner from './LoadingSpinner';
 import ModelSelector from './ModelSelector';
 import DocumentsPanel from './DocumentsPanel';
+import { PromptInputBox } from './ai-prompt-box';
 import { docgenApi } from '../../services/docgen';
 import { SummaryResponse, PlanResponse, DesignResponse, FullResponse } from '../../schemas/docgen';
 
@@ -32,7 +32,6 @@ interface ChatInterfaceProps {
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
@@ -46,7 +45,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
   const [isDocGenLoading, setIsDocGenLoading] = useState(false);
   const [docGenError, setDocGenError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     fetchSuggestedQuestions();
@@ -152,7 +150,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    // Input clearing is handled by PromptInputBox internally
     setIsLoading(true);
     setError(null);
 
@@ -210,33 +208,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    sendMessage(inputValue);
-  };
-
   const handleSuggestedQuestion = (question: string) => {
     sendMessage(question);
   };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage(inputValue);
-    }
-  };
-
-  const adjustTextareaHeight = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-    }
-  };
-
-  useEffect(() => {
-    adjustTextareaHeight();
-  }, [inputValue]);
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -355,25 +329,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ problemId, problemContext
           )}
         </div>
         
-        <form onSubmit={handleSubmit} className="flex items-center gap-3">
-          <textarea
-            ref={textareaRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask a question..."
-            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sih-blue resize-none"
-            disabled={isLoading}
-            rows={1}
+        <div className="flex items-center gap-3">
+          <PromptInputBox 
+            onSend={(message: string, files?: File[]) => {
+              // Handle files if needed (for future image support)
+              if (files && files.length > 0) {
+                console.log('Files uploaded:', files);
+              }
+              sendMessage(message);
+            }}
+            isLoading={isLoading}
+            placeholder="Ask a question about this problem statement..."
+            className="flex-1"
           />
-          <button
-            type="submit"
-            disabled={!inputValue.trim() || isLoading}
-            className="w-10 h-10 flex-shrink-0 bg-sih-orange hover:bg-opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-full flex items-center justify-center transition-colors"
-          >
-            {isLoading ? <LoadingSpinner size="sm" color="gray" /> : <PaperAirplaneIcon className="w-5 h-5" />}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );
